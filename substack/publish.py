@@ -3,6 +3,7 @@ import re
 import sys
 import markdown
 from playwright.sync_api import sync_playwright
+from playwright_stealth import Stealth
 
 # --- Selectors (Updated from actual Substack DOM) ---
 NEW_POST_URL = "https://therawtape.substack.com/publish/post"
@@ -96,15 +97,26 @@ def main():
     print(f"Tags: {tags_str}")
     print(f"Meta Description: {meta_desc}")
 
-    # 9. Playwright Substack Publishing Flow
-    with sync_playwright() as p:
+    # 9. Playwright Substack Publishing Flow with Stealth
+    with Stealth().use_sync(sync_playwright()) as p:
         if not os.path.exists(STATE_FILE):
             print(
                 f"Warning: State file not found at {STATE_FILE}. Make sure the secret is configured correctly."
             )
 
         print("Launching browser with saved session...")
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(
+            headless=True,
+            args=[
+                "--disable-blink-features=AutomationControlled",
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-infobars",
+                "--window-position=0,0",
+                "--ignore-certificate-errors",
+                "--ignore-certificate-errors-spki-list",
+            ],
+        )
 
         context_args = {}
         if os.path.exists(STATE_FILE):
@@ -122,8 +134,29 @@ def main():
 
         try:
             print("Navigating to Substack editor...")
-            page.goto(NEW_POST_URL)
-            print(f"Current URL: {page.url}")
+            # Cloudflare might need some time to process even with stealth
+            page.goto(NEW_POST_URL, wait_until="domcontentloaded")
+
+            # Wait a bit for Cloudflare challenge to potentially resolve automatically
+            print(f"Initial URL: {page.url}")
+            if (
+                "cloudflare" in page.content().lower()
+                or "verification" in page.title().lower()
+            ):
+                print(
+                    "Cloudflare detected. Waiting up to 30 seconds for challenge resolution..."
+                )
+                for i in range(30):
+                    page.wait_for_timeout(1000)
+                    if TITLE_INPUT_SELECTOR in page.content():
+                        print("Bypassed Cloudflare successfully!")
+                        break
+                    if i % 5 == 0:
+                        print(
+                            f"Still waiting... ({i}s) - Current Title: {page.title()}"
+                        )
+
+            print(f"Final URL: {page.url}")
 
             # --- Title ---
             print("Entering title...")
@@ -156,9 +189,6 @@ def main():
             print("Opening publish panel...")
             page.click(PUBLISH_PANEL_BUTTON)
             page.wait_for_timeout(4000)  # Wait for animation
-
-            # DEBUG
-            page.screenshot(path="debug_timeout.png")
 
             # --- Tags ---
             print("Entering tags...")
