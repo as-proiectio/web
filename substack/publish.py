@@ -104,8 +104,14 @@ def main():
                 f"Warning: State file not found at {STATE_FILE}. Make sure the secret is configured correctly."
             )
 
-        print("Launching Firefox with saved session...")
-        browser = p.firefox.launch(headless=True)
+        print("Launching Chromium in headful mode (via xvfb)...")
+        browser = p.chromium.launch(
+            headless=False,
+            args=[
+                "--disable-blink-features=AutomationControlled",
+                "--no-sandbox",
+            ],
+        )
 
         context_args = {}
         if os.path.exists(STATE_FILE):
@@ -122,16 +128,13 @@ def main():
             page.goto("https://substack.com")
 
             # Check for Cloudflare on homepage
-            if (
-                "just a moment" in page.title().lower()
-                or "verification" in page.title().lower()
-            ):
-                print("Cloudflare detected on homepage. Waiting for resolution...")
-                for i in range(30):
-                    page.wait_for_timeout(1000)
-                    if "just a moment" not in page.title().lower():
-                        print(f"Bypassed Cloudflare on homepage (at {i}s)!")
-                        break
+            print(f"Homepage Title: {page.title()}")
+            for i in range(45):
+                title = page.title().lower()
+                if "just a moment" not in title and "verification" not in title:
+                    print(f"Bypassed Cloudflare on homepage (at {i}s)!")
+                    break
+                page.wait_for_timeout(1000)
 
             # 2. Navigate to Substack editor
             print("Navigating to Substack editor...")
@@ -141,7 +144,6 @@ def main():
             print(f"Initial Editor URL: {page.url}")
             for i in range(60):
                 title = page.title().lower()
-                # 'Just a moment', 'Loading', 'Verification' - when the title does not change
                 if (
                     "just a moment" not in title
                     and "loading" not in title

@@ -43,7 +43,9 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          playwright install --with-deps firefox
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+          playwright install --with-deps chromium
 
       - name: Publish to Substack
         env:
@@ -53,8 +55,8 @@ jobs:
           # Restore Playwright session state from secret
           echo '${{ secrets.SUBSTACK_STATE_JSON }}' > substack/state.json
 
-          # Run the Substack publish script
-          python substack/publish.py
+          # Run the Substack publish script using xvfb for headful mode bypass
+          xvfb-run --auto-servernum --server-args="-screen 0 1280x800x24" python substack/publish.py
 
       - name: Upload Debug Screenshots
         if: failure()
