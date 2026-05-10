@@ -34,8 +34,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip3 install -r requirements.txt
-          playwright install --with-deps chromium
+          pip3 install --break-system-packages -r requirements.txt
+          playwright install chromium
 
       - name: Publish to Substack
         env:
