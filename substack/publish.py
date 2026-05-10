@@ -111,6 +111,8 @@ def main():
             context_args["storage_state"] = STATE_FILE
         context = browser.new_context(
             **context_args,
+            user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            viewport={"width": 1280, "height": 800},
             permissions=[
                 "clipboard-read",
                 "clipboard-write",
