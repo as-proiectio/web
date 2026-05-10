@@ -56,6 +56,13 @@ jobs:
           # Run the Substack publish script
           python substack/publish.py
 
+      - name: Upload Debug Screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: substack-debug-screenshots
+          path: "*.png"
+
   # publish-naver:
   #   name: Publish to Naver Premium
   #   runs-on: ubuntu-latest

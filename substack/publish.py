@@ -123,10 +123,19 @@ def main():
         try:
             print("Navigating to Substack editor...")
             page.goto(NEW_POST_URL)
+            print(f"Current URL: {page.url}")
 
             # --- Title ---
             print("Entering title...")
-            page.wait_for_selector(TITLE_INPUT_SELECTOR, state="visible")
+            try:
+                page.wait_for_selector(
+                    TITLE_INPUT_SELECTOR, state="visible", timeout=30000
+                )
+            except Exception as e:
+                print(f"Timeout occurred at URL: {page.url}")
+                page.screenshot(path="error_screen.png")
+                raise e
+
             page.fill(TITLE_INPUT_SELECTOR, title)
 
             # --- Body (Rich Text) ---
