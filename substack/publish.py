@@ -113,10 +113,6 @@ def main():
         context = browser.new_context(
             **context_args,
             viewport={"width": 1280, "height": 800},
-            permissions=[
-                "clipboard-read",
-                "clipboard-write",
-            ],  # Required for clipboard pasting
         )
         page = context.new_page()
 
