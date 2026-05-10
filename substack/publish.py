@@ -104,26 +104,14 @@ def main():
                 f"Warning: State file not found at {STATE_FILE}. Make sure the secret is configured correctly."
             )
 
-        print("Launching browser with saved session...")
-        browser = p.chromium.launch(
-            headless=True,
-            args=[
-                "--disable-blink-features=AutomationControlled",
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-infobars",
-                "--window-position=0,0",
-                "--ignore-certificate-errors",
-                "--ignore-certificate-errors-spki-list",
-            ],
-        )
+        print("Launching Firefox with saved session...")
+        browser = p.firefox.launch(headless=True)
 
         context_args = {}
         if os.path.exists(STATE_FILE):
             context_args["storage_state"] = STATE_FILE
         context = browser.new_context(
             **context_args,
-            user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
             viewport={"width": 1280, "height": 800},
             permissions=[
                 "clipboard-read",
@@ -134,24 +122,28 @@ def main():
 
         try:
             print("Navigating to Substack editor...")
-            # Cloudflare might need some time to process even with stealth
+            # Firefox handles Cloudflare challenges differently
             page.goto(NEW_POST_URL, wait_until="domcontentloaded")
 
-            # Wait a bit for Cloudflare challenge to potentially resolve automatically
+            # Wait for Cloudflare challenge to resolve
             print(f"Initial URL: {page.url}")
             if (
-                "cloudflare" in page.content().lower()
+                "just a moment" in page.title().lower()
                 or "verification" in page.title().lower()
             ):
                 print(
-                    "Cloudflare detected. Waiting up to 30 seconds for challenge resolution..."
+                    "Cloudflare detected. Waiting up to 60 seconds for challenge resolution..."
                 )
-                for i in range(30):
+                for i in range(60):
                     page.wait_for_timeout(1000)
-                    if TITLE_INPUT_SELECTOR in page.content():
-                        print("Bypassed Cloudflare successfully!")
+                    # Check for editor elements or title change
+                    if (
+                        page.locator(TITLE_INPUT_SELECTOR).count() > 0
+                        or "just a moment" not in page.title().lower()
+                    ):
+                        print(f"Bypassed Cloudflare successfully (at {i}s)!")
                         break
-                    if i % 5 == 0:
+                    if i % 10 == 0:
                         print(
                             f"Still waiting... ({i}s) - Current Title: {page.title()}"
                         )
