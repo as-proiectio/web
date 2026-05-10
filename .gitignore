@@ -15,3 +15,4 @@ naverpremium/state.json
 
 # Downloaded Markdown Files
 *.md
+!README.md
