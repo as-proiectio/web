@@ -17,8 +17,7 @@ STATE_FILE = "substack/state.json"
 
 def main():
     # 1. Retrieve the markdown file path
-    # file_path = os.environ.get("POST_FILE_PATH") # TODO
-    file_path = "./alpha_signal_20260509_test_en.md"
+    file_path = os.environ.get("POST_FILE_PATH")
     if not file_path:
         print("Error: POST_FILE_PATH environment variable is not set.")
         sys.exit(1)
