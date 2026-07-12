@@ -101,30 +101,37 @@ def read_markdown_file(file_path: str) -> str:
         sys.exit(1)
 
 
-def paste_rich_text(editor_frame, selector: str, html_content: str, paste_last: bool = False) -> bool:
-    """Dispatches a synthetic paste event with rich HTML content into the editor frame."""
-    success = editor_frame.evaluate(
-        """([sel, html, useLast]) => {
-            const targets = document.querySelectorAll(sel);
-            if (targets.length === 0) return false;
-            const target = useLast ? targets[targets.length - 1] : targets[0];
-            
-            target.focus();
-            
-            const dataTransfer = new DataTransfer();
-            dataTransfer.setData('text/html', html);
-            
-            const event = new ClipboardEvent('paste', {
-                clipboardData: dataTransfer,
-                bubbles: true,
-                cancelable: true
-            });
-            target.dispatchEvent(event);
-            return true;
-        }""",
-        [selector, html_content, paste_last]
+def paste_rich_text(page, editor_frame, selector: str, html_content: str, paste_last: bool = False):
+    """Writes HTML content to clipboard using standard wrappers and triggers paste."""
+    # Wrap in standard clipboard template to ensure the editor parses it as rich HTML
+    wrapped_html = (
+        f"<!DOCTYPE html><html><head><meta charset='utf-8'></head><body>"
+        f"<!--StartFragment-->{html_content}<!--EndFragment--></body></html>"
     )
-    return bool(success)
+    
+    # Ensure page is focused for clipboard access
+    page.bring_to_front()
+    
+    # Write to clipboard in page context using direct arguments to avoid escaping issues
+    page.evaluate(
+        """async (html) => {
+            const blob = new Blob([html], { type: 'text/html' });
+            const data = [new ClipboardItem({ 'text/html': blob })];
+            await navigator.clipboard.write(data);
+        }""",
+        wrapped_html
+    )
+    
+    # Target either first or last editor block based on placement
+    loc = editor_frame.locator(selector)
+    target_loc = loc.last if paste_last else loc.first
+    
+    target_loc.wait_for(state="attached", timeout=10000)
+    target_loc.focus()
+    page.wait_for_timeout(500)
+    
+    # Trigger paste command
+    page.keyboard.press("Meta+V")
 
 
 def publish_to_naver(title: str, free_html: str, paid_html: str, keep_alive: bool = True):
@@ -190,13 +197,15 @@ def publish_to_naver(title: str, free_html: str, paid_html: str, keep_alive: boo
             # Handle temporary save popup (Dismiss if exists)
             print("Checking for temporary save popups...")
             try:
-                # Use get_by_role and let Playwright auto-wait up to 3 seconds for the popup to show
-                cancel_btn = editor_frame.get_by_role("button", name="취소")
-                cancel_btn.click(timeout=3000)
-                print("Dismissed temporary save popup.")
-                # Wait for the popup to be fully removed from DOM before title input
-                cancel_btn.wait_for(state="detached", timeout=5000)
-                page.wait_for_timeout(2000)
+                # Scope to popup containers to avoid matching permanent UI buttons
+                cancel_btn = editor_frame.locator(".se-popup button:has-text('취소'), .se-dialog button:has-text('취소'), .se-popup-button-cancel").first
+                if cancel_btn.count() > 0:
+                    cancel_btn.click(timeout=3000)
+                    print("Dismissed temporary save popup.")
+                    cancel_btn.wait_for(state="detached", timeout=5000)
+                    page.wait_for_timeout(2000)
+                else:
+                    print("No temporary save popup visible.")
             except Exception as e:
                 print("No temporary save popup detected or failed to dismiss:", e)
 
@@ -217,12 +226,8 @@ def publish_to_naver(title: str, free_html: str, paid_html: str, keep_alive: boo
 
             print("Pasting free content...")
             try:
-                # Paste HTML using synthetic paste event in the editor frame
-                success = paste_rich_text(editor_frame, BODY_INPUT_SELECTOR, free_html, paste_last=False)
-                if success:
-                    print("Successfully pasted free content.")
-                else:
-                    print("Failed to find body element to paste free content.")
+                # Paste HTML using standard clipboard paste
+                paste_rich_text(page, editor_frame, BODY_INPUT_SELECTOR, free_html, paste_last=False)
                 page.wait_for_timeout(2000)
             except Exception as e:
                 print("Failed to paste free content into body:", e)
@@ -240,11 +245,7 @@ def publish_to_naver(title: str, free_html: str, paid_html: str, keep_alive: boo
                 print("Pasting paid content...")
                 try:
                     # Paste paid HTML into the last paragraph block created below the paywall
-                    success = paste_rich_text(editor_frame, BODY_INPUT_SELECTOR, paid_html, paste_last=True)
-                    if success:
-                        print("Successfully pasted paid content.")
-                    else:
-                        print("Failed to find body element to paste paid content.")
+                    paste_rich_text(page, editor_frame, BODY_INPUT_SELECTOR, paid_html, paste_last=True)
                     page.wait_for_timeout(2000)
                 except Exception as e:
                     print("Failed to paste paid content into body:", e)
