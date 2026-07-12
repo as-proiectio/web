@@ -127,10 +127,9 @@ def publish_to_naver(title: str, html_content: str):
 
             print("Entering title...")
             try:
-                page.wait_for_selector(
-                    TITLE_INPUT_SELECTOR, state="visible", timeout=15000
-                )
-                page.click(TITLE_INPUT_SELECTOR)
+                # 비어있는 span 태그는 크기가 0이라 visible 체크에 실패할 수 있으므로 attached로 대기
+                page.wait_for_selector(TITLE_INPUT_SELECTOR, state="attached", timeout=15000)
+                page.click(TITLE_INPUT_SELECTOR, force=True)
                 page.keyboard.type(title)
             except Exception as e:
                 print("Could not enter title. Error:", e)
@@ -146,10 +145,8 @@ def publish_to_naver(title: str, html_content: str):
             page.evaluate(clipboard_injection_js)
 
             try:
-                page.wait_for_selector(
-                    BODY_INPUT_SELECTOR, state="visible", timeout=10000
-                )
-                page.click(BODY_INPUT_SELECTOR)
+                page.wait_for_selector(BODY_INPUT_SELECTOR, state="attached", timeout=10000)
+                page.click(BODY_INPUT_SELECTOR, force=True)
                 page.wait_for_timeout(500)
                 page.keyboard.press("Meta+V")  # Cmd+V on mac, Ctrl+V on windows
                 page.wait_for_timeout(2000)
@@ -158,16 +155,16 @@ def publish_to_naver(title: str, html_content: str):
 
             print("Inserting paywall...")
             try:
-                page.wait_for_selector(PAYWALL_BUTTON, state="visible", timeout=5000)
-                page.click(PAYWALL_BUTTON)
+                page.wait_for_selector(PAYWALL_BUTTON, state="attached", timeout=5000)
+                page.click(PAYWALL_BUTTON, force=True)
                 page.wait_for_timeout(1000)
             except Exception as e:
                 print("Could not click paywall button:", e)
 
             print("Clicking next button...")
             try:
-                page.wait_for_selector(NEXT_BUTTON, state="visible", timeout=5000)
-                page.click(NEXT_BUTTON)
+                page.wait_for_selector(NEXT_BUTTON, state="attached", timeout=5000)
+                page.click(NEXT_BUTTON, force=True)
                 page.wait_for_timeout(3000)
                 print("Proceeded to next step!")
             except Exception as e:
