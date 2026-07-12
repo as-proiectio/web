@@ -178,12 +178,11 @@ def publish_to_naver(title: str, free_html: str, paid_html: str, keep_alive: boo
             # Handle temporary save popup (Dismiss if exists)
             print("Checking for temporary save popups...")
             try:
-                # Wait briefly for popup buttons and click "취소" (Cancel)
-                cancel_btn = editor_frame.locator("button:has-text('취소'), .se-popup-button-cancel, .se-popup-button:has-text('취소')").first
-                if cancel_btn.count() > 0:
-                    cancel_btn.click(timeout=3000)
-                    print("Dismissed temporary save popup.")
-                    page.wait_for_timeout(1000)
+                # Use get_by_role and let Playwright auto-wait up to 3 seconds for the popup to show
+                cancel_btn = editor_frame.get_by_role("button", name="취소")
+                cancel_btn.click(timeout=3000)
+                print("Dismissed temporary save popup.")
+                page.wait_for_timeout(1000)
             except Exception as e:
                 print("No temporary save popup detected or failed to dismiss:", e)
 
