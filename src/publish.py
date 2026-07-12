@@ -6,7 +6,7 @@ from playwright.sync_api import sync_playwright
 from playwright_stealth import Stealth
 
 # --- Configuration ---
-NEW_POST_URL = "https://studio.premium.naver.com/post/write"
+NEW_POST_URL = "https://studio.premium.naver.com/post"
 TITLE_INPUT_SELECTOR = (
     "textarea[placeholder*='제목을 입력하세요'], input[placeholder*='제목']"
 )
@@ -78,9 +78,20 @@ def publish_to_naver(title: str, html_content: str):
     """Executes the Playwright publishing flow."""
     with Stealth().use_sync(sync_playwright()) as p:
         if not os.path.exists(STATE_FILE):
-            print(
-                f"Warning: State file not found at {STATE_FILE}. Please login manually and save state.json."
-            )
+            print(f"로그인 세션 파일이 없습니다 ({STATE_FILE}).")
+            print("최초 1회 수동 로그인이 필요합니다. 브라우저가 열리면 로그인을 진행해 주세요.")
+            
+            browser = p.chromium.launch(headless=False, args=["--disable-blink-features=AutomationControlled", "--no-sandbox"])
+            context = browser.new_context(viewport={"width": 1280, "height": 800})
+            page = context.new_page()
+            page.goto(NEW_POST_URL)
+            
+            input("✅ 로그인이 완전히 끝나고 에디터 화면이 나오면 터미널에서 [Enter] 키를 누르세요...")
+            
+            context.storage_state(path=STATE_FILE)
+            print(f"세션 파일이 성공적으로 저장되었습니다 ({STATE_FILE})! 다시 실행해 주세요.")
+            browser.close()
+            sys.exit(0)
 
         # TODO: Set headless=True when running reliably in background
         browser = p.chromium.launch(
