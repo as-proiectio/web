@@ -7,12 +7,10 @@ from playwright_stealth import Stealth
 
 # --- Configuration ---
 NEW_POST_URL = "https://studio.premium.naver.com/post"
-TITLE_INPUT_SELECTOR = (
-    "textarea[placeholder*='제목을 입력하세요'], input[placeholder*='제목']"
-)
-BODY_INPUT_SELECTOR = ".se-main-container, .se-content"
-PUBLISH_PANEL_BUTTON = "button:has-text('발행')"
-CONFIRM_PUBLISH_BUTTON = "button:has-text('발행하기')"
+TITLE_INPUT_SELECTOR = "span.se-fs32.__se-node"
+BODY_INPUT_SELECTOR = "span.se-placeholder.se-fs15, .se-main-container"
+PAYWALL_BUTTON = ".se-l-document-toolbar > ul > li:nth-child(19) > button"
+NEXT_BUTTON = "#nextBtn"
 STATE_FILE = os.path.join(os.path.dirname(__file__), ".naver_session.json")
 
 
@@ -78,18 +76,23 @@ def publish_to_naver(title: str, html_content: str):
     """Executes the Playwright publishing flow."""
     with Stealth().use_sync(sync_playwright()) as p:
         if not os.path.exists(STATE_FILE):
-            print(f"로그인 세션 파일이 없습니다 ({STATE_FILE}).")
-            print("최초 1회 수동 로그인이 필요합니다. 브라우저가 열리면 로그인을 진행해 주세요.")
-            
-            browser = p.chromium.launch(headless=False, args=["--disable-blink-features=AutomationControlled", "--no-sandbox"])
+            print(f"Didn't find login session file ({STATE_FILE}).")
+            print("You need to log in once. Please log in when the browser opens.")
+
+            browser = p.chromium.launch(
+                headless=False,
+                args=["--disable-blink-features=AutomationControlled", "--no-sandbox"],
+            )
             context = browser.new_context(viewport={"width": 1280, "height": 800})
             page = context.new_page()
             page.goto(NEW_POST_URL)
-            
-            input("✅ 로그인이 완전히 끝나고 에디터 화면이 나오면 터미널에서 [Enter] 키를 누르세요...")
-            
+
+            input("✅ Press [Enter] key after you finish logging in...")
+
             context.storage_state(path=STATE_FILE)
-            print(f"세션 파일이 성공적으로 저장되었습니다 ({STATE_FILE})! 다시 실행해 주세요.")
+            print(
+                f"Session file saved successfully ({STATE_FILE})! Please run the script again."
+            )
             browser.close()
             sys.exit(0)
 
@@ -110,13 +113,12 @@ def publish_to_naver(title: str, html_content: str):
         try:
             print("Navigating to Naver Premium Studio...")
             page.goto(NEW_POST_URL)
-            page.wait_for_load_state("networkidle")
+            page.wait_for_timeout(3000)
 
             print("Clicking '텍스트' (Text content) button...")
             try:
-                # 텍스트 버튼 클릭을 통해 에디터 화면으로 넘어감
-                page.click("text='텍스트'")
-                page.wait_for_load_state("networkidle")
+                page.click("text='텍스트'", timeout=5000)
+                page.wait_for_timeout(3000)
             except Exception as e:
                 print("Could not find '텍스트' button, proceeding anyway. Error:", e)
 
@@ -125,9 +127,10 @@ def publish_to_naver(title: str, html_content: str):
                 page.wait_for_selector(
                     TITLE_INPUT_SELECTOR, state="visible", timeout=15000
                 )
-                page.fill(TITLE_INPUT_SELECTOR, title)
+                page.click(TITLE_INPUT_SELECTOR)
+                page.keyboard.type(title)
             except Exception as e:
-                print("Could not find title selector, proceeding anyway. Error:", e)
+                print("Could not enter title. Error:", e)
 
             print("Writing to clipboard and pasting Rich Text...")
             clipboard_injection_js = f"""
@@ -141,7 +144,7 @@ def publish_to_naver(title: str, html_content: str):
 
             try:
                 page.wait_for_selector(
-                    BODY_INPUT_SELECTOR, state="visible", timeout=15000
+                    BODY_INPUT_SELECTOR, state="visible", timeout=10000
                 )
                 page.click(BODY_INPUT_SELECTOR)
                 page.wait_for_timeout(500)
@@ -150,19 +153,26 @@ def publish_to_naver(title: str, html_content: str):
             except Exception as e:
                 print("Failed to paste into body:", e)
 
-            print("Publishing...")
+            print("Inserting paywall...")
             try:
-                # TODO: Add logic to set tags and categories in Naver Premium Content here if needed
-                page.click(PUBLISH_PANEL_BUTTON)
-                page.wait_for_timeout(2000)
-                page.click(CONFIRM_PUBLISH_BUTTON)
-                page.wait_for_timeout(3000)
-                print("Successfully published to Naver Premium!")
+                page.wait_for_selector(PAYWALL_BUTTON, state="visible", timeout=5000)
+                page.click(PAYWALL_BUTTON)
+                page.wait_for_timeout(1000)
             except Exception as e:
-                print("Could not complete publish flow automatically:", e)
+                print("Could not click paywall button:", e)
 
-            if storage_state:
-                context.storage_state(path=STATE_FILE)
+            print("Clicking next button...")
+            try:
+                page.wait_for_selector(NEXT_BUTTON, state="visible", timeout=5000)
+                page.click(NEXT_BUTTON)
+                page.wait_for_timeout(3000)
+                print("Proceeded to next step!")
+            except Exception as e:
+                print("Could not click next button:", e)
+
+            # ALWAYS save session state to refresh it
+            context.storage_state(path=STATE_FILE)
+            print("Session state refreshed successfully.")
 
         except Exception as e:
             print(f"Failed to publish to Naver Premium: {e}")
