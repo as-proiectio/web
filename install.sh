@@ -30,7 +30,7 @@ cat > "$PLIST_PATH" << EOF
     <array>
         <string>$(command -v uv)</string>
         <string>run</string>
-        <string>$DIR/monitor.py</string>
+        <string>$DIR/src/monitor.py</string>
     </array>
     <key>WorkingDirectory</key>
     <string>$DIR</string>
