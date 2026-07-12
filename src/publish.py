@@ -2,41 +2,61 @@ import os
 import re
 import sys
 import markdown
+from datetime import datetime
 from typing import Tuple
 from playwright.sync_api import sync_playwright
 from playwright_stealth import Stealth
 
 # --- Configuration ---
 NEW_POST_URL = "https://studio.premium.naver.com/post/write"
-TITLE_INPUT_SELECTOR = "textarea[placeholder*='제목을 입력하세요'], input[placeholder*='제목']"
+TITLE_INPUT_SELECTOR = (
+    "textarea[placeholder*='제목을 입력하세요'], input[placeholder*='제목']"
+)
 BODY_INPUT_SELECTOR = ".se-main-container, .se-content"
 PUBLISH_PANEL_BUTTON = "button:has-text('발행')"
 CONFIRM_PUBLISH_BUTTON = "button:has-text('발행하기')"
 STATE_FILE = os.path.join(os.path.dirname(__file__), ".naver_session.json")
 
-def process_markdown_content(content: str, is_korean: bool) -> str:
+
+def process_markdown_content(content: str) -> str:
     """Removes '### Daily Point' sections and appends a disclaimer."""
-    pattern = r"(###\s+(?:Daily Point|데일리 포인트|CIO 코멘트).*?)(?=\n##|\Z)"
+    pattern = r"(###\s+(?:Daily Point|데일리 포인트).*?)(?=\n##|\Z)"
     cleaned_content = re.sub(pattern, "", content, flags=re.DOTALL | re.IGNORECASE)
-    
-    disclaimer = (
-        "\n\n---\n*Disclaimer: 본 발행물은 정보 제공 및 교육용으로만 제공되며 재무, 투자 또는 법률적 조언을 구성하지 않습니다.*"
-        if is_korean 
-        else "\n\n---\n*Disclaimer: The information provided is for informational purposes only and does not constitute financial, investment, or legal advice.*"
-    )
-    
+
+    disclaimer = "\n\n---\n❇︎ 중요 안내사항 ❇︎\n1. 본 리포트(Alpha Signal)는 투자 판단을 돕기 위한 순수 데이터 제공을 목적으로 하며, 특정 종목에 대한 매수·매도 등 투자 권유나 자문을 의미하지 않습니다.\n2. 제공되는 모든 내용은 자체 개발한 AI 알고리즘이 미국 시장의 영문 공시 및 뉴스 원문에서 팩트 수치(KPI)만을 기계적으로 추출한 결과물이며, 작성자의 주관적 의견이 배제되어 있습니다.\n3. 자동화된 시스템을 통한 수집 과정에서 오류, 지연 또는 누락이 발생할 수 있으므로 정보의 완전성을 보장하지 않습니다. 중요한 수치는 반드시 영문 원문을 교차 검증하시기 바랍니다.\n4. 본 리포트의 데이터를 활용한 모든 투자 판단과 결과에 대한 최종 책임은 전적으로 구독자 본인에게 있습니다.\n5. 본 채널에서 발행한 모든 콘텐츠는 3개월 경과 후 구독상품에서 제외됩니다.\n6. 서비스 운영에 관한 질문은 이메일을 통해 문의하여 주시기 바랍니다. 리포트의 해석 또는 투자 판단에 영향을 미치는 문의에는 답변하지 않습니다."
+
     return cleaned_content.strip() + disclaimer
 
-def extract_metadata(content: str, is_korean: bool) -> Tuple[str, str]:
+
+def extract_metadata(content: str, file_path: str) -> Tuple[str, str]:
     """Extracts date and tags to generate the title."""
     date_match = re.search(r"##\s+(\d{2}\s+[A-Za-z]+\s+\d{4})", content)
-    post_date = date_match.group(1) if date_match else "Unknown Date"
+    if date_match:
+        raw_date = date_match.group(1)
+        try:
+            # Parse '12 July 2026' and format to '2026년 07월 12일'
+            dt = datetime.strptime(raw_date, "%d %B %Y")
+            post_date = dt.strftime("%Y년 %m월 %d일")
+        except ValueError:
+            post_date = "알 수 없는 날짜"
+    else:
+        post_date = "알 수 없는 날짜"
+
+    is_korean = "_ko.md" in file_path
+    is_premarket = "premarket" in file_path.lower()
+
+    if is_premarket:
+        base_title = f"{post_date} 프리마켓"
+    else:
+        base_title = f"{post_date} 알파 시그널"
+
+    title = base_title if is_korean else f"{base_title} (EN)"
 
     tags = re.findall(r"[-*]\s+\*\*([^\*]+)\*\*", content)[:3]
     tags_str = ", ".join(tags)
 
-    title = f"{post_date} - 일일 시황 요약 ({tags_str})" if is_korean else f"{post_date} - The Daily Tape ({tags_str})"
     return title, tags_str
+
 
 def read_markdown_file(file_path: str) -> str:
     """Reads the target markdown file safely."""
@@ -50,11 +70,14 @@ def read_markdown_file(file_path: str) -> str:
         print(f"Error: File not found at {file_path}")
         sys.exit(1)
 
+
 def publish_to_naver(title: str, html_content: str):
     """Executes the Playwright publishing flow."""
     with Stealth().use_sync(sync_playwright()) as p:
         if not os.path.exists(STATE_FILE):
-            print(f"Warning: State file not found at {STATE_FILE}. Please login manually and save state.json.")
+            print(
+                f"Warning: State file not found at {STATE_FILE}. Please login manually and save state.json."
+            )
 
         # TODO: Set headless=True when running reliably in background
         browser = p.chromium.launch(
@@ -64,11 +87,10 @@ def publish_to_naver(title: str, html_content: str):
 
         storage_state = STATE_FILE if os.path.exists(STATE_FILE) else None
         context = browser.new_context(
-            viewport={"width": 1280, "height": 800},
-            storage_state=storage_state
+            viewport={"width": 1280, "height": 800}, storage_state=storage_state
         )
         context.grant_permissions(["clipboard-read", "clipboard-write"])
-        
+
         page = context.new_page()
 
         try:
@@ -78,7 +100,9 @@ def publish_to_naver(title: str, html_content: str):
 
             print("Entering title...")
             try:
-                page.wait_for_selector(TITLE_INPUT_SELECTOR, state="visible", timeout=15000)
+                page.wait_for_selector(
+                    TITLE_INPUT_SELECTOR, state="visible", timeout=15000
+                )
                 page.fill(TITLE_INPUT_SELECTOR, title)
             except Exception as e:
                 print("Could not find title selector, proceeding anyway. Error:", e)
@@ -94,10 +118,12 @@ def publish_to_naver(title: str, html_content: str):
             page.evaluate(clipboard_injection_js)
 
             try:
-                page.wait_for_selector(BODY_INPUT_SELECTOR, state="visible", timeout=15000)
+                page.wait_for_selector(
+                    BODY_INPUT_SELECTOR, state="visible", timeout=15000
+                )
                 page.click(BODY_INPUT_SELECTOR)
                 page.wait_for_timeout(500)
-                page.keyboard.press("Meta+V") # Cmd+V on mac, Ctrl+V on windows
+                page.keyboard.press("Meta+V")  # Cmd+V on mac, Ctrl+V on windows
                 page.wait_for_timeout(2000)
             except Exception as e:
                 print("Failed to paste into body:", e)
@@ -122,19 +148,20 @@ def publish_to_naver(title: str, html_content: str):
         finally:
             browser.close()
 
+
 def main():
     file_path = os.environ.get("POST_FILE_PATH", "")
     content = read_markdown_file(file_path)
     print(f"Loaded Markdown: {file_path}")
-    
-    is_korean = "_ko.md" in file_path
-    title, tags_str = extract_metadata(content, is_korean)
+
+    title, tags_str = extract_metadata(content, file_path)
     print(f"Title: {title}\nTags: {tags_str}")
 
-    raw_body = process_markdown_content(content, is_korean)
+    raw_body = process_markdown_content(content)
     html_content = markdown.markdown(raw_body, extensions=["tables"]).replace("\n", "")
-    
+
     publish_to_naver(title, html_content)
+
 
 if __name__ == "__main__":
     main()
