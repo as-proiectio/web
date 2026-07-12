@@ -1,7 +1,6 @@
 import os
 import re
 import sys
-import json
 import markdown
 from playwright.sync_api import sync_playwright
 from playwright_stealth import Stealth
@@ -104,16 +103,15 @@ def read_markdown_file(file_path: str) -> str:
 
 def paste_rich_text(page, html_content: str):
     """Writes HTML content to clipboard and simulates paste command."""
-    # Use json.dumps to safely escape newlines and quotes for JavaScript injection
-    escaped_html = json.dumps(html_content)
-    clipboard_injection_js = f"""
-    async () => {{
-        const blob = new Blob([{escaped_html}], {{ type: 'text/html' }});
-        const data = [new ClipboardItem({{ 'text/html': blob }})];
-        await navigator.clipboard.write(data);
-    }}
-    """
-    page.evaluate(clipboard_injection_js)
+    # Pass html_content as a parameter to avoid double-escaping issues with json.dumps
+    page.evaluate(
+        """async (html) => {
+            const blob = new Blob([html], { type: 'text/html' });
+            const data = [new ClipboardItem({ 'text/html': blob })];
+            await navigator.clipboard.write(data);
+        }""",
+        html_content
+    )
     page.keyboard.press("Meta+V")
 
 
@@ -176,6 +174,18 @@ def publish_to_naver(title: str, free_html: str, paid_html: str, keep_alive: boo
             except Exception as e:
                 print("Failed to locate editor iframe. Operating on main page instead.", e)
                 editor_frame = page # type: ignore
+
+            # Handle temporary save popup (Dismiss if exists)
+            print("Checking for temporary save popups...")
+            try:
+                # Wait briefly for popup buttons and click "취소" (Cancel)
+                cancel_btn = editor_frame.locator("button:has-text('취소'), .se-popup-button-cancel, .se-popup-button:has-text('취소')").first
+                if cancel_btn.count() > 0:
+                    cancel_btn.click(timeout=3000)
+                    print("Dismissed temporary save popup.")
+                    page.wait_for_timeout(1000)
+            except Exception as e:
+                print("No temporary save popup detected or failed to dismiss:", e)
 
             print("Entering title...")
             try:
