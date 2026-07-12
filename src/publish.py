@@ -108,9 +108,17 @@ def publish_to_naver(title: str, html_content: str):
         page = context.new_page()
 
         try:
-            print("Navigating to Naver Premium editor...")
+            print("Navigating to Naver Premium Studio...")
             page.goto(NEW_POST_URL)
             page.wait_for_load_state("networkidle")
+
+            print("Clicking '텍스트' (Text content) button...")
+            try:
+                # 텍스트 버튼 클릭을 통해 에디터 화면으로 넘어감
+                page.click("text='텍스트'")
+                page.wait_for_load_state("networkidle")
+            except Exception as e:
+                print("Could not find '텍스트' button, proceeding anyway. Error:", e)
 
             print("Entering title...")
             try:
