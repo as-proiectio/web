@@ -3,7 +3,7 @@
 .env
 
 # Playwright / Naver state
-.publish_state.json
+.naver_session.json
 
 # Python
 __pycache__/
