@@ -2,7 +2,6 @@ import os
 import re
 import sys
 import markdown
-from datetime import datetime
 from typing import Tuple
 from playwright.sync_api import sync_playwright
 from playwright_stealth import Stealth
@@ -30,15 +29,11 @@ def process_markdown_content(content: str) -> str:
 
 def extract_metadata(content: str, file_path: str) -> Tuple[str, str]:
     """Extracts date and tags to generate the title."""
-    date_match = re.search(r"##\s+(\d{2}\s+[A-Za-z]+\s+\d{4})", content)
+    # Extract date from filename (e.g. 20260712)
+    date_match = re.search(r"(\d{4})(\d{2})(\d{2})", file_path)
     if date_match:
-        raw_date = date_match.group(1)
-        try:
-            # Parse '12 July 2026' and format to '2026년 07월 12일'
-            dt = datetime.strptime(raw_date, "%d %B %Y")
-            post_date = dt.strftime("%Y년 %m월 %d일")
-        except ValueError:
-            post_date = "알 수 없는 날짜"
+        year, month, day = date_match.groups()
+        post_date = f"{year}년 {month}월 {day}일"
     else:
         post_date = "알 수 없는 날짜"
 
