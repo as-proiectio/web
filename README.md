@@ -16,7 +16,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ### 2. Authentication Setup
 
-Before running the background service, you need to manually log in to Naver once so the script can save your session to bypass captchas. Place your `state.json` inside the `src/` directory.
+Before running the background service, you need to manually log in to Naver once so the script can save your session to bypass captchas. Place your `.naver_session.json` inside the `src/` directory.
 
 ### 3. Background Daemon (macOS)
 

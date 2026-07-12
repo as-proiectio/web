@@ -12,7 +12,7 @@ TITLE_INPUT_SELECTOR = "textarea[placeholder*='제목을 입력하세요'], inpu
 BODY_INPUT_SELECTOR = ".se-main-container, .se-content"
 PUBLISH_PANEL_BUTTON = "button:has-text('발행')"
 CONFIRM_PUBLISH_BUTTON = "button:has-text('발행하기')"
-STATE_FILE = os.path.join(os.path.dirname(__file__), "state.json")
+STATE_FILE = os.path.join(os.path.dirname(__file__), ".naver_session.json")
 
 def process_markdown_content(content: str, is_korean: bool) -> str:
     """Removes '### Daily Point' sections and appends a disclaimer."""

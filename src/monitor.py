@@ -10,7 +10,7 @@ from watchdog.events import FileSystemEventHandler
 # Paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 CORE_DATA_DIR = BASE_DIR.parent / "core" / "data"
-STATE_FILE = BASE_DIR / ".publish_state.json"
+STATE_FILE = BASE_DIR / ".publish_history.json"
 PUBLISH_SCRIPT = BASE_DIR / "src" / "publish.py"
 
 def load_state():
