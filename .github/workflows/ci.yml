@@ -25,8 +25,8 @@ jobs:
       - name: Run Ruff (Lint & Format)
         run: uv run ruff check .
         
-      - name: Run Pyright (Type Check)
-        run: uv run pyright .
+      - name: Run Pyrefly (Type Check)
+        run: uv run pyrefly check .
         
       - name: Run Bandit (Security Scan)
         run: uv run bandit -r . -c "bandit.yaml" || uv run bandit -r .
