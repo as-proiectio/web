@@ -72,11 +72,13 @@ class ReportHandler(FileSystemEventHandler):
 
     def on_created(self, event):
         if not event.is_directory:
-            self.process_file(Path(event.src_path))
+            path_str = event.src_path.decode() if isinstance(event.src_path, bytes) else event.src_path
+            self.process_file(Path(path_str))
             
     def on_modified(self, event):
         if not event.is_directory:
-            self.process_file(Path(event.src_path))
+            path_str = event.src_path.decode() if isinstance(event.src_path, bytes) else event.src_path
+            self.process_file(Path(path_str))
 
 def main():
     if not CORE_DATA_DIR.exists():
@@ -92,16 +94,8 @@ def main():
     try:
         while True:
             time.sleep(1)
-            state = load_state()
             for path in CORE_DATA_DIR.rglob("*.md"):
-                if path.name not in state["published_files"]:
-                    is_korean = "_ko.md" in path.name
-                    if is_korean:
-                        english_filename = path.name.replace("_ko.md", ".md")
-                        if english_filename in state["published_files"]:
-                            event_handler.process_file(path)
-                    else:
-                        event_handler.process_file(path)
+                event_handler.process_file(path)
                         
     except KeyboardInterrupt:
         observer.stop()
