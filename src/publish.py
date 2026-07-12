@@ -36,6 +36,35 @@ def process_markdown_content(content: str, file_path: str) -> str:
     return content.strip() + disclaimer
 
 
+def split_markdown_by_paywall(content: str, file_path: str) -> tuple[str, str]:
+    """Splits markdown into free and paid parts based on report type."""
+    is_premarket = "premarket" in file_path.lower()
+    
+    if is_premarket:
+        # Premarket: Split below the first article.
+        # Since the header is already removed, content starts directly with the first article.
+        parts = content.split("\n\n")
+        if len(parts) > 1:
+            free_markdown = parts[0]
+            paid_markdown = "\n\n".join(parts[1:])
+        else:
+            free_markdown = content
+            paid_markdown = ""
+    else:
+        # Regular report: Split above "### General" or "### 경제 일반"
+        pattern = r"(\n*###\s+(?:General|경제 일반))"
+        match = re.search(pattern, content, re.IGNORECASE)
+        if match:
+            split_idx = match.start()
+            free_markdown = content[:split_idx]
+            paid_markdown = content[split_idx:]
+        else:
+            free_markdown = content
+            paid_markdown = ""
+            
+    return free_markdown.strip(), paid_markdown.strip()
+
+
 def extract_metadata(file_path: str) -> str:
     """Extracts date from filename to generate the title."""
     # Extract date from filename (e.g. 20260712)
@@ -72,8 +101,21 @@ def read_markdown_file(file_path: str) -> str:
         sys.exit(1)
 
 
-def publish_to_naver(title: str, html_content: str):
-    """Executes the Playwright publishing flow."""
+def paste_rich_text(page, html_content: str):
+    """Writes HTML content to clipboard and simulates paste command."""
+    clipboard_injection_js = f"""
+    async () => {{
+        const blob = new Blob([`{html_content}`], {{ type: 'text/html' }});
+        const data = [new ClipboardItem({{ 'text/html': blob }})];
+        await navigator.clipboard.write(data);
+    }}
+    """
+    page.evaluate(clipboard_injection_js)
+    page.keyboard.press("Meta+V")
+
+
+def publish_to_naver(title: str, free_html: str, paid_html: str):
+    """Executes the Playwright publishing flow with paywall splitting."""
     with Stealth().use_sync(sync_playwright()) as p:
         if not os.path.exists(STATE_FILE):
             print(f"Didn't find login session file ({STATE_FILE}).")
@@ -123,23 +165,22 @@ def publish_to_naver(title: str, html_content: str):
             except Exception as e:
                 print("Could not find or click '텍스트' button. Proceeding anyway. Error:", e)
 
-            # 에디터 iframe 대기 및 로케이터 생성
+            # Wait for editor iframe and construct FrameLocator
             print("Locating editor iframe...")
             try:
                 page.wait_for_selector("iframe[src*='editor']", state="attached", timeout=15000)
                 editor_frame = page.frame_locator("iframe[src*='editor']")
             except Exception as e:
                 print("Failed to locate editor iframe. Operating on main page instead.", e)
-                # Fallback to main page locator (which will likely fail but prevents crash)
                 editor_frame = page # type: ignore
 
             print("Entering title...")
             try:
-                # 1. 먼저 타이틀 영역을 한번 클릭해 에디터 포커스를 깨움
+                # 1. Click the title wrapper to initialize editor focus
                 editor_frame.locator(".se-title-text").first.click(force=True)
                 page.wait_for_timeout(500)
                 
-                # 2. 실제 contenteditable span에 포커스 후 타이핑
+                # 2. Focus the exact contenteditable span and type
                 title_loc = editor_frame.locator(TITLE_INPUT_SELECTOR).first
                 title_loc.wait_for(state="attached", timeout=15000)
                 title_loc.focus()
@@ -148,30 +189,22 @@ def publish_to_naver(title: str, html_content: str):
             except Exception as e:
                 print("Could not enter title. Error:", e)
 
-            print("Writing to clipboard and pasting Rich Text...")
-            clipboard_injection_js = f"""
-            async () => {{
-                const blob = new Blob([`{html_content}`], {{ type: 'text/html' }});
-                const data = [new ClipboardItem({{ 'text/html': blob }})];
-                await navigator.clipboard.write(data);
-            }}
-            """
-            page.evaluate(clipboard_injection_js)
-
+            print("Pasting free content...")
             try:
-                # 1. 본문 영역을 한번 클릭해 커서 위치시킴
+                # 1. Click the body area to position the cursor
                 editor_frame.locator(".se-section-text").first.click(force=True)
                 page.wait_for_timeout(500)
                 
-                # 2. 실제 contenteditable span에 포커스 후 붙여넣기
+                # 2. Focus the actual contenteditable span and paste
                 body_loc = editor_frame.locator(BODY_INPUT_SELECTOR).first
                 body_loc.wait_for(state="attached", timeout=10000)
                 body_loc.focus()
                 page.wait_for_timeout(500)
-                page.keyboard.press("Meta+V")  # Cmd+V on mac
+                
+                paste_rich_text(page, free_html)
                 page.wait_for_timeout(2000)
             except Exception as e:
-                print("Failed to paste into body:", e)
+                print("Failed to paste free content into body:", e)
 
             print("Inserting paywall...")
             try:
@@ -181,6 +214,15 @@ def publish_to_naver(title: str, html_content: str):
                 page.wait_for_timeout(1000)
             except Exception as e:
                 print("Could not click paywall button:", e)
+
+            if paid_html:
+                print("Pasting paid content...")
+                try:
+                    # Paste paid content right after the paywall block
+                    paste_rich_text(page, paid_html)
+                    page.wait_for_timeout(2000)
+                except Exception as e:
+                    print("Failed to paste paid content into body:", e)
 
             print("Clicking next button...")
             try:
@@ -212,9 +254,13 @@ def main():
     print(f"Title: {title}")
 
     raw_body = process_markdown_content(content, file_path)
-    html_content = markdown.markdown(raw_body, extensions=["tables"]).replace("\n", "")
+    free_markdown, paid_markdown = split_markdown_by_paywall(raw_body, file_path)
 
-    publish_to_naver(title, html_content)
+    # Render Markdown to HTML and compress newlines
+    free_html = markdown.markdown(free_markdown, extensions=["tables"]).replace("\n", "")
+    paid_html = markdown.markdown(paid_markdown, extensions=["tables"]).replace("\n", "") if paid_markdown else ""
+
+    publish_to_naver(title, free_html, paid_html)
 
 
 if __name__ == "__main__":
