@@ -3,7 +3,6 @@
 .env
 
 # Playwright / Naver state
-naver-premium/state.json
 .publish_state.json
 
 # Python
@@ -15,4 +14,5 @@ __pycache__/
 # Logs
 *.log
 
-# uv
+# ruff
+.ruff_cache
