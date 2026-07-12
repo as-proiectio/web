@@ -101,18 +101,30 @@ def read_markdown_file(file_path: str) -> str:
         sys.exit(1)
 
 
-def paste_rich_text(page, html_content: str):
-    """Writes HTML content to clipboard and simulates paste command."""
-    # Pass html_content as a parameter to avoid double-escaping issues with json.dumps
-    page.evaluate(
-        """async (html) => {
-            const blob = new Blob([html], { type: 'text/html' });
-            const data = [new ClipboardItem({ 'text/html': blob })];
-            await navigator.clipboard.write(data);
+def paste_rich_text(editor_frame, selector: str, html_content: str, paste_last: bool = False) -> bool:
+    """Dispatches a synthetic paste event with rich HTML content into the editor frame."""
+    success = editor_frame.evaluate(
+        """([sel, html, useLast]) => {
+            const targets = document.querySelectorAll(sel);
+            if (targets.length === 0) return false;
+            const target = useLast ? targets[targets.length - 1] : targets[0];
+            
+            target.focus();
+            
+            const dataTransfer = new DataTransfer();
+            dataTransfer.setData('text/html', html);
+            
+            const event = new ClipboardEvent('paste', {
+                clipboardData: dataTransfer,
+                bubbles: true,
+                cancelable: true
+            });
+            target.dispatchEvent(event);
+            return true;
         }""",
-        html_content
+        [selector, html_content, paste_last]
     )
-    page.keyboard.press("Meta+V")
+    return bool(success)
 
 
 def publish_to_naver(title: str, free_html: str, paid_html: str, keep_alive: bool = True):
@@ -182,7 +194,9 @@ def publish_to_naver(title: str, free_html: str, paid_html: str, keep_alive: boo
                 cancel_btn = editor_frame.get_by_role("button", name="취소")
                 cancel_btn.click(timeout=3000)
                 print("Dismissed temporary save popup.")
-                page.wait_for_timeout(1000)
+                # Wait for the popup to be fully removed from DOM before title input
+                cancel_btn.wait_for(state="detached", timeout=5000)
+                page.wait_for_timeout(2000)
             except Exception as e:
                 print("No temporary save popup detected or failed to dismiss:", e)
 
@@ -203,17 +217,12 @@ def publish_to_naver(title: str, free_html: str, paid_html: str, keep_alive: boo
 
             print("Pasting free content...")
             try:
-                # 1. Click the body area to position the cursor
-                editor_frame.locator(".se-section-text").first.click(force=True)
-                page.wait_for_timeout(500)
-                
-                # 2. Focus the actual contenteditable span and paste
-                body_loc = editor_frame.locator(BODY_INPUT_SELECTOR).first
-                body_loc.wait_for(state="attached", timeout=10000)
-                body_loc.focus()
-                page.wait_for_timeout(500)
-                
-                paste_rich_text(page, free_html)
+                # Paste HTML using synthetic paste event in the editor frame
+                success = paste_rich_text(editor_frame, BODY_INPUT_SELECTOR, free_html, paste_last=False)
+                if success:
+                    print("Successfully pasted free content.")
+                else:
+                    print("Failed to find body element to paste free content.")
                 page.wait_for_timeout(2000)
             except Exception as e:
                 print("Failed to paste free content into body:", e)
@@ -230,8 +239,12 @@ def publish_to_naver(title: str, free_html: str, paid_html: str, keep_alive: boo
             if paid_html:
                 print("Pasting paid content...")
                 try:
-                    # Paste paid content right after the paywall block
-                    paste_rich_text(page, paid_html)
+                    # Paste paid HTML into the last paragraph block created below the paywall
+                    success = paste_rich_text(editor_frame, BODY_INPUT_SELECTOR, paid_html, paste_last=True)
+                    if success:
+                        print("Successfully pasted paid content.")
+                    else:
+                        print("Failed to find body element to paste paid content.")
                     page.wait_for_timeout(2000)
                 except Exception as e:
                     print("Failed to paste paid content into body:", e)
