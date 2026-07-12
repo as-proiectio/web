@@ -2,56 +2,39 @@ import os
 import re
 import sys
 import markdown
-import httpx
 from playwright.sync_api import sync_playwright
 from playwright_stealth import Stealth
 
-# --- Selectors for Naver Premium Content ---
-# NOTE: These selectors need to be adjusted based on the actual Naver SmartEditor ONE structure.
+# TODO: Verify or update these selectors if Naver Premium Content layout changes.
 NEW_POST_URL = "https://studio.premium.naver.com/post/write"
 TITLE_INPUT_SELECTOR = "textarea[placeholder*='제목을 입력하세요'], input[placeholder*='제목']"
 BODY_INPUT_SELECTOR = ".se-main-container, .se-content"
 PUBLISH_PANEL_BUTTON = "button:has-text('발행')"
 CONFIRM_PUBLISH_BUTTON = "button:has-text('발행하기')"
 
+# The state file will reside near this script
 STATE_FILE = os.path.join(os.path.dirname(__file__), "state.json")
 
-def generate_meta_desc(content: str, tags_str: str) -> str:
-    try:
-        topline_match = re.search(
-            r"Topline Signals(.*?)(?=Daily Point|$)", content, re.DOTALL | re.IGNORECASE
-        )
-        if topline_match:
-            topline_text = topline_match.group(1).strip()
-            bullets = re.findall(r"[-*] \*\*(.*?)\*\*: (.*)", topline_text)
-            text_to_summarize = "\n".join([f"- {c}: {t}" for c, t in bullets[:3]])
-        else:
-            text_to_summarize = content[:1000]
-
-        prompt = f"""
-            Task: Based on the extracted Topline Signals, generate a single SEO Meta Description.
-            Topline Signals:
-            {text_to_summarize}
-            Constraints:
-            - Length: Strictly between 140 and 160 characters.
-            - Format: Return ONLY the description text. No quotes.
-        """
-        with httpx.Client(timeout=60.0) as client:
-            response = client.post(
-                "http://localhost:11434/api/generate",
-                json={
-                    "model": "llama3.1",
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {"num_ctx": 2048, "temperature": 0.3, "num_predict": 100},
-                },
-            )
-            response.raise_for_status()
-            result = response.json()
-            return result["response"].strip().replace('"', "")
-    except Exception as e:
-        print(f"Ollama generation failed, falling back: {e}")
-        return f"Today's market signals on {tags_str}."
+def process_markdown_content(content: str, is_korean: bool) -> str:
+    """
+    Process markdown to remove '### Daily Point' sections to avoid compliance issues
+    and return the cleaned markdown string.
+    """
+    # Find the start of ### Daily Point and the start of the next section (like Weekly Schedule)
+    # We will remove everything from "### Daily Point" up to but NOT including the next "###" or "##" section.
+    # Note: Weekly schedule could be "### Weekly Schedule", "### 주간 일정", etc.
+    
+    # We remove anything between '### Daily Point' (or similar) up to the next heading
+    # To be safe, we just remove the entire Daily Point section.
+    
+    # regex matches "### Daily Point" or "### 데일리 포인트" up to the next "###" or "##"
+    pattern = r"(###\s+(?:Daily Point|데일리 포인트|CIO 코멘트).*?)(?=\n##|\Z)"
+    cleaned_content = re.sub(pattern, "", content, flags=re.DOTALL | re.IGNORECASE)
+    
+    # Add a disclaimer at the end
+    disclaimer = "\n\n---\n*Disclaimer: 본 발행물은 정보 제공 및 교육용으로만 제공되며 재무, 투자 또는 법률적 조언을 구성하지 않습니다.*" if is_korean else "\n\n---\n*Disclaimer: The information provided is for informational purposes only and does not constitute financial, investment, or legal advice.*"
+    
+    return cleaned_content.strip() + disclaimer
 
 def main():
     file_path = os.environ.get("POST_FILE_PATH")
@@ -67,12 +50,13 @@ def main():
         sys.exit(1)
 
     print(f"Loaded Markdown: {file_path}")
-    
     is_korean = "_ko.md" in file_path
     
+    # Extract date
     date_match = re.search(r"##\s+(\d{2}\s+[A-Za-z]+\s+\d{4})", content)
     post_date = date_match.group(1) if date_match else "Unknown Date"
 
+    # Extract tags
     tags = re.findall(r"[-*]\s+\*\*([^\*]+)\*\*", content)
     tags = tags[:3]
     tags_str = ", ".join(tags)
@@ -81,30 +65,24 @@ def main():
         title = f"{post_date} - 일일 시황 요약 ({tags_str})"
     else:
         title = f"{post_date} - The Daily Tape ({tags_str})"
-        
-    meta_desc = generate_meta_desc(content, tags_str)
 
-    body_match = re.search(r"###\s+Daily\s+Point(.*)", content, re.DOTALL)
-    if body_match:
-        raw_body = "### Daily Point\n\n" + body_match.group(1).strip()
-    else:
-        raw_body = content
+    # Process and remove compliance-risk sections
+    raw_body = process_markdown_content(content, is_korean)
 
-    disclaimer = "\n\n---\n*Disclaimer: 본 발행물은 정보 제공 및 교육용으로만 제공되며 재무, 투자 또는 법률적 조언을 구성하지 않습니다.*" if is_korean else "\n\n---\n*Disclaimer: The information provided is for informational purposes only...*"
-    raw_body += disclaimer
-
+    # Convert to HTML for Clipboard API
     html_content = markdown.markdown(raw_body, extensions=["tables"])
     html_content = html_content.replace("\n", "")
 
     print(f"Title: {title}")
     print(f"Tags: {tags_str}")
-
+    
+    # TODO: Make sure state.json has been generated by manually logging into Naver once.
     with Stealth().use_sync(sync_playwright()) as p:
         if not os.path.exists(STATE_FILE):
             print(f"Warning: State file not found at {STATE_FILE}. Please login manually and save state.json.")
 
         browser = p.chromium.launch(
-            headless=False,
+            headless=False, # TODO: Set headless=True when running reliably in background
             args=["--disable-blink-features=AutomationControlled", "--no-sandbox"],
         )
 
@@ -152,6 +130,7 @@ def main():
 
             print("Publishing...")
             try:
+                # TODO: Add logic to set tags and categories in Naver Premium Content here if needed
                 page.click(PUBLISH_PANEL_BUTTON)
                 page.wait_for_timeout(2000)
                 page.click(CONFIRM_PUBLISH_BUTTON)
