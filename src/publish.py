@@ -31,7 +31,7 @@ def process_markdown_content(content: str, file_path: str) -> str:
         if match:
             content = content[match.start() :]
 
-    disclaimer = "<br /><br />---<br />❇︎ 중요 안내사항 ❇︎<br />1. 본 리포트(Alpha Signal)는 투자 판단을 돕기 위한 순수 데이터 제공을 목적으로 하며, 특정 종목에 대한 매수·매도 등 투자 권유나 자문을 의미하지 않습니다.<br />2. 제공되는 모든 내용은 자체 개발한 AI 알고리즘이 미국 시장의 영문 공시 및 뉴스 원문에서 팩트 수치(KPI)만을 기계적으로 추출한 결과물이며, 작성자의 주관적 의견이 배제되어 있습니다.<br />3. 자동화된 시스템을 통한 수집 과정에서 오류, 지연 또는 누락이 발생할 수 있으므로 정보의 완전성을 보장하지 않습니다. 중요한 수치는 반드시 영문 원문을 교차 검증하시기 바랍니다.<br />4. 본 리포트의 데이터를 활용한 모든 투자 판단과 결과에 대한 최종 책임은 전적으로 구독자 본인에게 있습니다.<br />5. 본 채널에서 발행한 모든 콘텐츠는 3개월 경과 후 구독상품에서 제외됩니다.<br />6. 서비스 운영에 관한 질문은 이메일을 통해 문의하여 주시기 바랍니다. 리포트의 해석 또는 투자 판단에 영향을 미치는 문의에는 답변하지 않습니다."
+    disclaimer = "\n\n---\n<h2>❇︎ 중요 안내사항 ❇︎</h2><br />1. 본 리포트(Alpha Signal)는 투자 판단을 돕기 위한 순수 데이터 제공을 목적으로 하며, 특정 종목에 대한 매수·매도 등 투자 권유나 자문을 의미하지 않습니다.<br />2. 제공되는 모든 내용은 자체 개발한 AI 알고리즘이 미국 시장의 영문 공시 및 뉴스 원문에서 팩트 수치(KPI)만을 기계적으로 추출한 결과물이며, 작성자의 주관적 의견이 배제되어 있습니다.<br />3. 자동화된 시스템을 통한 수집 과정에서 오류, 지연 또는 누락이 발생할 수 있으므로 정보의 완전성을 보장하지 않습니다. 중요한 수치는 반드시 영문 원문을 교차 검증하시기 바랍니다.<br />4. 본 리포트의 데이터를 활용한 모든 투자 판단과 결과에 대한 최종 책임은 전적으로 구독자 본인에게 있습니다.<br />5. 본 채널에서 발행한 모든 콘텐츠는 3개월 경과 후 구독상품에서 제외됩니다.<br />6. 서비스 운영에 관한 질문은 이메일을 통해 문의하여 주시기 바랍니다. 리포트의 해석 또는 투자 판단에 영향을 미치는 문의에는 답변하지 않습니다."
 
     return content.strip() + disclaimer
 
@@ -88,6 +88,25 @@ def extract_metadata(file_path: str) -> str:
     return title
 
 
+def inject_inline_styles(html: str) -> str:
+    """Injects inline CSS styles to preserve formatting when pasted into Naver Editor."""
+    # Headings formatting (large, bold, with margins)
+    html = html.replace("<h2>", "<h2 style='font-size: 20px; font-weight: bold; margin-top: 24px; margin-bottom: 12px; line-height: 1.4; color: #111111;'>")
+    
+    # Paragraph formatting (body font size and generous bottom margins for spacing between articles)
+    html = html.replace("<p>", "<p style='font-size: 15px; line-height: 1.8; margin-top: 0; margin-bottom: 24px; color: #333333;'>")
+    
+    # Link formatting
+    html = html.replace("<a ", "<a style='color: #0066cc; text-decoration: underline;' ")
+    
+    # Table formatting
+    html = html.replace("<table>", "<table style='border-collapse: collapse; width: 100%; margin-top: 16px; margin-bottom: 16px;'>")
+    html = html.replace("<th>", "<th style='border: 1px solid #dddddd; padding: 8px; background-color: #f2f2f2; font-weight: bold; text-align: left;'>")
+    html = html.replace("<td>", "<td style='border: 1px solid #dddddd; padding: 8px; text-align: left;'>")
+    
+    return html
+
+
 def read_markdown_file(file_path: str) -> str:
     """Reads the target markdown file safely."""
     if not file_path:
@@ -110,10 +129,10 @@ def paste_rich_text(
         f"<!DOCTYPE html><html><head><meta charset='utf-8'></head><body>"
         f"<!--StartFragment-->{html_content}<!--EndFragment--></body></html>"
     )
-
+    
     # Ensure page is focused for clipboard access
     page.bring_to_front()
-
+    
     # Write to clipboard in page context using direct arguments to avoid escaping issues
     page.evaluate(
         """async (html) => {
@@ -121,17 +140,25 @@ def paste_rich_text(
             const data = [new ClipboardItem({ 'text/html': blob })];
             await navigator.clipboard.write(data);
         }""",
-        wrapped_html,
+        wrapped_html
     )
-
+    
+    # Click the section wrapper to force cursor positioning in the body
+    wrapper_loc = editor_frame.locator(".se-section-text")
+    target_wrapper = wrapper_loc.last if paste_last else wrapper_loc.first
+    
+    target_wrapper.wait_for(state="attached", timeout=10000)
+    target_wrapper.click(force=True)
+    page.wait_for_timeout(500)
+    
     # Target either first or last editor block based on placement
     loc = editor_frame.locator(selector)
     target_loc = loc.last if paste_last else loc.first
-
+    
     target_loc.wait_for(state="attached", timeout=10000)
     target_loc.focus()
-    page.wait_for_timeout(500)
-
+    page.wait_for_timeout(1000)
+    
     # Trigger paste command
     page.keyboard.press("Meta+V")
 
@@ -209,7 +236,9 @@ def publish_to_naver(
             print("Checking for temporary save popups...")
             try:
                 # Target the specific cancel button ID
-                cancel_btn = editor_frame.locator("#localStorageMessageLayerCancelBtn").first
+                cancel_btn = editor_frame.locator(
+                    "#localStorageMessageLayerCancelBtn"
+                ).first
                 # Wait up to 3 seconds for the popup to appear
                 cancel_btn.wait_for(state="visible", timeout=3000)
                 cancel_btn.click()
@@ -316,7 +345,13 @@ def main():
     # Map <h3> to <h2> because Naver SmartEditor ONE maps <h2> to Heading blocks
     # while <h3> is stripped down to plain text.
     free_html = free_html.replace("<h3>", "<h2>").replace("</h3>", "</h2>")
-    paid_html = paid_html.replace("<h3>", "<h2>").replace("</h3>", "</h2>") if paid_html else ""
+    paid_html = (
+        paid_html.replace("<h3>", "<h2>").replace("</h3>", "</h2>") if paid_html else ""
+    )
+
+    # Inject inline styles to preserve heading sizes, paragraph spacing, and tables
+    free_html = inject_inline_styles(free_html)
+    paid_html = inject_inline_styles(paid_html) if paid_html else ""
 
     publish_to_naver(title, free_html, paid_html, keep_alive=True)
 
