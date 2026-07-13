@@ -548,12 +548,22 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
             print(f"Pasting paid content at index {paid_text_idx}...")
             paste_at_index(page, editor_frame, paid_text_idx, paid_html)
 
+            # Close template sidebar if it's open to tidy up and ensure no overlays
+            try:
+                close_btn = editor_frame.locator("button.se-panel-close, button.se-panel-close-button, button.se-btn-panel-close").first
+                if close_btn.count() > 0 and close_btn.is_visible():
+                    close_btn.click(timeout=3000)
+                    print("Closed template sidebar.")
+                    page.wait_for_timeout(1000)
+            except Exception:
+                pass
+
             # Proceed to Settings
             print("Clicking next button...")
             try:
-                # Find and click next button on the editor_frame context (inside iframe)
-                next_loc = editor_frame.locator(NEXT_BUTTON).first
-                next_loc.wait_for(state="attached", timeout=10000)
+                # Find and click next button on the main page (parent page) context
+                next_loc = page.locator(NEXT_BUTTON).first
+                next_loc.wait_for(state="visible", timeout=10000)
                 next_loc.click(force=True)
                 page.wait_for_timeout(1000)
                 
