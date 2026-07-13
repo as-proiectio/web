@@ -339,22 +339,29 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
             except Exception as e:
                 print("Could not find or click '텍스트' button. Proceeding anyway. Error:", e)
 
-            # Wait for editor iframe and construct Frame
-            print("Locating editor iframe...")
-            try:
-                page.wait_for_selector("iframe[src*='editor']", state="attached", timeout=15000)
-                # Retrieve actual Frame object to support .evaluate()
-                editor_frame = page.frame(url=re.compile(r"editor"))
-                if not editor_frame:
-                    for frame in page.frames:
-                        if "editor" in frame.url or "editor" in frame.name:
-                            editor_frame = frame
-                            break
-                if not editor_frame:
-                    raise Exception("Could not resolve Frame object.")
-            except Exception as e:
-                print("Failed to locate editor iframe. Operating on main page instead.", e)
-                editor_frame = page  # type: ignore
+            # Smart Page-Level Editor Auto-Detection Logic
+            print("Checking if editor is loaded on the main page...")
+            page.wait_for_timeout(3000)
+            
+            if page.locator(".se-component, .se-title-text").count() > 0:
+                print("Editor detected directly on the main page.")
+                editor_frame = page
+            else:
+                print("Editor not detected on main page. Resolving editor iframe...")
+                try:
+                    page.wait_for_selector("iframe[src*='editor']", state="attached", timeout=15000)
+                    editor_frame = page.frame(url=re.compile(r"editor"))
+                    if not editor_frame:
+                        for frame in page.frames:
+                            if "editor" in frame.url or "editor" in frame.name:
+                                editor_frame = frame
+                                break
+                    if not editor_frame:
+                        print("Failed to resolve iframe object. Falling back to page context.")
+                        editor_frame = page
+                except Exception as e:
+                    print("Failed to locate editor iframe. Operating on main page instead.", e)
+                    editor_frame = page  # type: ignore
 
             # Handle temporary save popup (Dismiss if exists)
             print("Checking for temporary save popups...")
@@ -363,7 +370,6 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
                 cancel_btn.wait_for(state="visible", timeout=3000)
                 cancel_btn.click()
                 print("Dismissed temporary save popup.")
-                cancel_btn.wait_for(state="detached", timeout=5000)
                 page.wait_for_timeout(2000)
             except Exception:
                 print("No temporary save popup detected or failed to dismiss.")
