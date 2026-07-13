@@ -7,11 +7,19 @@ from playwright_stealth import Stealth
 
 # --- Configuration ---
 NEW_POST_URL = "https://studio.premium.naver.com/post"
+STATE_FILE = os.path.join(os.path.dirname(__file__), ".naver_session.json")
+
+# --- CSS Selectors ---
 TITLE_INPUT_SELECTOR = ".se-title-text span.__se-node"
 BODY_INPUT_SELECTOR = ".se-section-text span.__se-node"
 PAYWALL_BUTTON = ".se-paywall-toolbar-button"
 NEXT_BUTTON = "#nextBtn"
-STATE_FILE = os.path.join(os.path.dirname(__file__), ".naver_session.json")
+POPUP_CANCEL_BUTTON = "#localStorageMessageLayerCancelBtn"
+TEMPLATE_TOOLBAR_BUTTON = "li.se-toolbar-item.se-toolbar-item-template > button"
+MY_TEMPLATES_TAB_BUTTON = ".se-panel-tab-library ul > li:nth-child(3) > button"
+TEMPLATE_ITEM_REGULAR = "div.se-tab-content-my-template.se-is-on ul > li:nth-child(1) > a"
+TEMPLATE_ITEM_PREMARKET = "div.se-tab-content-my-template.se-is-on ul > li:nth-child(2) > a"
+TEMPLATE_OVERWRITE_CONFIRM_BUTTON = "button:has-text('확인'), .se-popup-button-confirm"
 
 # Canonical mapping of regular report categories to their English/Korean aliases in templates
 CATEGORY_MAP = {
@@ -141,9 +149,9 @@ def extract_regular_sections(content: str) -> dict[str, str]:
                 delim_idx = body.rfind("---", 0, disc_idx)
                 body = body[:delim_idx].strip() if delim_idx != -1 else body[:disc_idx].strip()
                 
-        sections[category_key] = body
-        
-    return sections
+            sections[category_key] = body
+            
+        return sections
 
 
 def extract_premarket_sections(content: str) -> dict[str, str]:
@@ -317,7 +325,7 @@ def publish_to_naver(title: str, file_path: str, html_sections: dict[str, str], 
             print("Checking for temporary save popups...")
             try:
                 # Target the specific cancel button ID
-                cancel_btn = editor_frame.locator("#localStorageMessageLayerCancelBtn").first
+                cancel_btn = editor_frame.locator(POPUP_CANCEL_BUTTON).first
                 # Wait up to 3 seconds for the popup to appear
                 cancel_btn.wait_for(state="visible", timeout=3000)
                 cancel_btn.click()
@@ -329,15 +337,21 @@ def publish_to_naver(title: str, file_path: str, html_sections: dict[str, str], 
 
             print("Opening template sidebar...")
             try:
-                template_btn = editor_frame.locator("li.se-toolbar-item.se-toolbar-item-template > button").first
+                template_btn = editor_frame.locator(TEMPLATE_TOOLBAR_BUTTON).first
                 template_btn.wait_for(state="attached", timeout=10000)
                 template_btn.click(force=True)
                 page.wait_for_timeout(1500)
                 
+                # Click the "내 템플릿" (My Templates) tab button
+                my_templates_tab = editor_frame.locator(MY_TEMPLATES_TAB_BUTTON).first
+                my_templates_tab.wait_for(state="visible", timeout=5000)
+                my_templates_tab.click(force=True)
+                page.wait_for_timeout(1000)
+                
                 template_sel = (
-                    "div.se-tab-content-my-template.se-is-on ul > li:nth-child(2) > a"
+                    TEMPLATE_ITEM_PREMARKET
                     if is_premarket
-                    else "div.se-tab-content-my-template.se-is-on ul > li:nth-child(1) > a"
+                    else TEMPLATE_ITEM_REGULAR
                 )
                 template_item = editor_frame.locator(template_sel).first
                 template_item.wait_for(state="visible", timeout=10000)
@@ -347,7 +361,7 @@ def publish_to_naver(title: str, file_path: str, html_sections: dict[str, str], 
                 
                 # Check for confirm popup (overwrite template confirm) and accept
                 try:
-                    confirm_btn = editor_frame.locator("button:has-text('확인'), .se-popup-button-confirm").first
+                    confirm_btn = editor_frame.locator(TEMPLATE_OVERWRITE_CONFIRM_BUTTON).first
                     if confirm_btn.count() > 0:
                         confirm_btn.click(timeout=2000)
                         print("Confirmed template load overwrite.")
