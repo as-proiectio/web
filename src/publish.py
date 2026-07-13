@@ -270,17 +270,7 @@ def compile_sections_html(file_path: str, content: str) -> tuple[str, str]:
 
 def paste_at_index(page, editor_frame, target_idx: int, html_content: str):
     """Focuses the .se-component block at target_idx and pastes HTML using clipboard Meta+V."""
-    target_block = editor_frame.locator(".se-component").nth(target_idx)
-    target_block.wait_for(state="attached", timeout=5000)
-    
-    target_el = target_block.locator(".se-text-paragraph, p, .se-placeholder, span").first
-    target_el.wait_for(state="attached", timeout=5000)
-    target_el.click(force=True)
-    page.wait_for_timeout(500)
-    target_el.focus()
-    page.wait_for_timeout(1000)
-    
-    # Write HTML contents to clipboard
+    # 1. Write HTML contents to clipboard first
     wrapped_html = f"<!DOCTYPE html><html><body><!--StartFragment-->{html_content}<!--EndFragment--></body></html>"
     page.evaluate(
         """async (html) => {
@@ -292,8 +282,21 @@ def paste_at_index(page, editor_frame, target_idx: int, html_content: str):
     )
     page.wait_for_timeout(500)
     
-    # Ensure window is active and paste using OS-level shortcut
+    # 2. Locate and focus the target block
+    target_block = editor_frame.locator(".se-component").nth(target_idx)
+    target_block.wait_for(state="attached", timeout=5000)
+    
+    target_el = target_block.locator(".se-text-paragraph, p, .se-placeholder, span").first
+    target_el.wait_for(state="attached", timeout=5000)
+    
+    # Ensure window is active and element is focused
     page.bring_to_front()
+    target_el.click(force=True)
+    page.wait_for_timeout(500)
+    target_el.focus()
+    page.wait_for_timeout(1000)
+    
+    # 3. Paste using OS-level shortcut
     page.keyboard.press("Meta+V")
     page.wait_for_timeout(1500)
 
