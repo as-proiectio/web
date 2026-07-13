@@ -27,6 +27,11 @@ CATEGORY_OPTION_REGULAR = "div.rc-virtual-list-holder div.ant-select-item-option
 CATEGORY_OPTION_PREMARKET = "div.rc-virtual-list-holder > div > div > div:nth-child(4)"
 PUBLISH_BUTTON = "div.buttons > div:nth-child(3) > button"
 
+# Author Selection Selectors (New 3-Step Selection)
+AUTHOR_OPEN_BUTTON = "div.item-check-list button"
+AUTHOR_LABEL_WALLSTREET = "div.item-check-list div.layer-scroll-area label:has-text('월가24'), div.item-check-list div.layer-scroll-area label:has-text('월가 24')"
+AUTHOR_CONFIRM_BUTTON = "div.item-check-list .layer-control-menus button.layer-control-menu, div.item-check-list button:has-text('확인')"
+
 # Canonical mapping of regular report categories to their English/Korean aliases in templates
 CATEGORY_MAP = {
     "Weekly Schedule": ["Weekly Schedule", "주간 일정", "주간일정"],
@@ -264,29 +269,32 @@ def compile_sections_html(file_path: str, content: str) -> tuple[str, str]:
 
 
 def paste_at_index(page, editor_frame, target_idx: int, html_content: str):
-    """Focuses the .se-component block at target_idx and injects HTML using native execCommand."""
+    """Focuses the .se-component block at target_idx and pastes HTML using clipboard Meta+V."""
     target_block = editor_frame.locator(".se-component").nth(target_idx)
     target_block.wait_for(state="attached", timeout=5000)
     
     target_el = target_block.locator(".se-text-paragraph, p, .se-placeholder, span").first
     target_el.wait_for(state="attached", timeout=5000)
+    target_el.click(force=True)
+    page.wait_for_timeout(500)
+    target_el.focus()
+    page.wait_for_timeout(1000)
     
-    # Programmatically focus and paste HTML inside editor frame context (robust against browser focus states)
-    editor_frame.evaluate(
-        """([el, html]) => {
-            el.focus();
-            const range = document.createRange();
-            range.selectNodeContents(el);
-            range.collapse(true); // collapse to start of paragraph
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(range);
-            
-            // Execute HTML insertion natively in contenteditable
-            document.execCommand('insertHTML', false, html);
+    # Write HTML contents to clipboard
+    wrapped_html = f"<!DOCTYPE html><html><body><!--StartFragment-->{html_content}<!--EndFragment--></body></html>"
+    page.evaluate(
+        """async (html) => {
+            const blob = new Blob([html], { type: 'text/html' });
+            const data = [new ClipboardItem({ 'text/html': blob })];
+            await navigator.clipboard.write(data);
         }""",
-        [target_el.element_handle(), html_content]
+        wrapped_html
     )
+    page.wait_for_timeout(500)
+    
+    # Ensure window is active and paste using OS-level shortcut
+    page.bring_to_front()
+    page.keyboard.press("Meta+V")
     page.wait_for_timeout(1500)
 
 
@@ -411,13 +419,16 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
 
             print("Entering title...")
             try:
-                # Focus title element
+                # Click title to focus
+                editor_frame.locator(".se-title-text").first.click(force=True)
+                page.wait_for_timeout(500)
+
                 title_loc = editor_frame.locator(TITLE_INPUT_SELECTOR).first
                 title_loc.wait_for(state="attached", timeout=15000)
                 
-                # Append title suffix via execCommand natively
-                editor_frame.evaluate(
-                    """([el, text]) => {
+                # Position cursor range to the end of the existing text ("2026년")
+                title_loc.evaluate(
+                    """el => {
                         el.focus();
                         const range = document.createRange();
                         range.selectNodeContents(el);
@@ -425,13 +436,10 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
                         const sel = window.getSelection();
                         sel.removeAllRanges();
                         sel.addRange(range);
-                        
-                        // Type text programmatically
-                        document.execCommand('insertText', false, text);
-                    }""",
-                    [title_loc.element_handle(), title]
+                    }"""
                 )
                 page.wait_for_timeout(500)
+                page.keyboard.type(title, delay=100)
             except Exception as e:
                 print("Could not enter title. Error:", e)
 
@@ -533,17 +541,25 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
                 except Exception:
                     print("No free gift promotion modal detected or failed to dismiss.")
                     
-                # Select author "월가24"
+                # Select author "월가24" (New 3-Step Selection)
                 print("Selecting author...")
                 try:
-                    author_select = page.locator("div.ant-row.ant-form-item:has-text('작성자') .ant-select-selector, .select-author .ant-select-selector").first
-                    author_select.wait_for(state="visible", timeout=3000)
-                    author_select.click()
+                    # 1. Click open button
+                    author_btn = page.locator(AUTHOR_OPEN_BUTTON).first
+                    author_btn.wait_for(state="visible", timeout=5000)
+                    author_btn.click()
                     page.wait_for_timeout(1000)
                     
-                    author_option = page.locator(".ant-select-item-option:has-text('월가24'), .ant-select-item-option:has-text('월가 24')").first
-                    author_option.wait_for(state="visible", timeout=5000)
-                    author_option.click()
+                    # 2. Click label "월가24"
+                    author_label = page.locator(AUTHOR_LABEL_WALLSTREET).first
+                    author_label.wait_for(state="visible", timeout=5000)
+                    author_label.click()
+                    page.wait_for_timeout(1000)
+                    
+                    # 3. Click Confirm button
+                    author_confirm = page.locator(AUTHOR_CONFIRM_BUTTON).first
+                    author_confirm.wait_for(state="visible", timeout=5000)
+                    author_confirm.click()
                     print("Selected author '월가24' successfully.")
                     page.wait_for_timeout(1000)
                 except Exception as e:
