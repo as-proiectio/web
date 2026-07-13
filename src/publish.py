@@ -427,14 +427,19 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
                 print("Could not enter title. Error:", e)
 
             # --- Paste Free & Paid Content with Paywall Insertion ---
+            # Exclude title blocks specifically from matching body paragraph index
             first_text_idx = editor_frame.evaluate(
                 """() => {
                     const elements = Array.from(document.querySelectorAll('.se-component'));
-                    return elements.findIndex(el => el.querySelector('.se-text-paragraph, p'));
+                    return elements.findIndex(el => 
+                        !el.classList.contains('se-document-title') &&
+                        !el.querySelector('.se-title-text') &&
+                        el.querySelector('.se-text-paragraph, p')
+                    );
                 }"""
             )
             if first_text_idx == -1:
-                first_text_idx = 0
+                first_text_idx = 1  # Fallback past title block
                 
             print(f"Pasting free content at index {first_text_idx}...")
             paste_at_index(page, editor_frame, first_text_idx, free_html)
@@ -450,7 +455,8 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
             except Exception as e:
                 print("Failed to click paywall button:", e)
                 
-            # Find the paragraph below the paywall
+            # Clean up all redundant template elements after paywall
+            # Returns the clean paragraph block index immediately below the paywall
             paid_text_idx = editor_frame.evaluate(
                 """() => {
                     const elements = Array.from(document.querySelectorAll('.se-component'));
@@ -459,17 +465,27 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
                         el.querySelector('[class*="paywall"], .se-paywall-line')
                     );
                     if (paywallIdx !== -1) {
+                        let targetIdx = -1;
                         for (let i = paywallIdx + 1; i < elements.length; i++) {
                             if (elements[i].querySelector('.se-text-paragraph, p')) {
-                                return i;
+                                targetIdx = i;
+                                break;
                             }
+                        }
+                        if (targetIdx !== -1) {
+                            // Remove all trailing template placeholders
+                            for (let i = targetIdx + 1; i < elements.length; i++) {
+                                elements[i].remove();
+                            }
+                            return targetIdx;
                         }
                     }
                     return -1;
                 }"""
             )
+            
             if paid_text_idx == -1:
-                print("Warning: Could not find block below paywall. Appending to end.")
+                print("Warning: Could not locate block below paywall. Appending to end.")
                 paid_text_idx = editor_frame.evaluate("() => document.querySelectorAll('.se-component').length - 1")
                 
             print(f"Pasting paid content at index {paid_text_idx}...")
@@ -481,8 +497,20 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
                 next_loc = editor_frame.locator(NEXT_BUTTON).first
                 next_loc.wait_for(state="attached", timeout=5000)
                 next_loc.click(force=True)
+                page.wait_for_timeout(1000)
+                
+                # Check for and dismiss any template validation warning popups
+                try:
+                    confirm_btn = editor_frame.locator("button:has-text('확인'), .se-popup-button-confirm, button.se-btn-confirm").first
+                    if confirm_btn.count() > 0 and confirm_btn.is_visible():
+                        confirm_btn.click()
+                        print("Dismissed editor validation warning popup.")
+                        page.wait_for_timeout(2000)
+                except Exception:
+                    pass
+                    
+                print("Proceeded to settings page.")
                 page.wait_for_timeout(3000)
-                print("Clicked next button. Proceeding to settings page...")
                 
                 # Dismiss promo modal if it appears
                 print("Checking for free gift promotion modal...")
@@ -540,12 +568,11 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
                 context.storage_state(path=STATE_FILE)
                 print("Session state refreshed successfully.")
 
-                # Locate publish button to verify existence, but DO NOT click (keep commented out as requested)
+                # Locate publish button to verify existence, but DO NOT click
                 print("Locating publish button...")
                 publish_btn = page.locator(PUBLISH_BUTTON).first
                 publish_btn.wait_for(state="visible", timeout=5000)
                 print("Publish button successfully located and verified!")
-                # publish_btn.click()  # Kept commented out as requested
 
                 if keep_alive:
                     print("\n============================================================")
@@ -556,9 +583,20 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
 
             except Exception as e:
                 print("Could not click next button or proceed.", e)
+                raise e
 
         except Exception as e:
             print(f"Failed to publish to Naver Premium: {e}")
+            try:
+                screenshot_path = "/Users/taehoonkwon/.gemini/antigravity-cli/brain/d7c2f4b6-c114-4103-aec7-557d2b122dd0/error_screenshot.png"
+                page.screenshot(path=screenshot_path)
+                print(f"Saved error screenshot to {screenshot_path}")
+            except Exception as se:
+                print("Failed to take screenshot:", se)
+            
+            if keep_alive:
+                print("Keeping browser open on error for inspection...")
+                input()
             raise e
         finally:
             browser.close()
