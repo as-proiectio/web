@@ -99,11 +99,6 @@ def inject_inline_styles(html: str) -> str:
     # Link formatting
     html = html.replace("<a ", "<a style='color: #0066cc; text-decoration: underline;' ")
     
-    # Table formatting
-    html = html.replace("<table>", "<table style='border-collapse: collapse; width: 100%; margin-top: 16px; margin-bottom: 16px;'>")
-    html = html.replace("<th>", "<th style='border: 1px solid #dddddd; padding: 8px; background-color: #f2f2f2; font-weight: bold; text-align: left;'>")
-    html = html.replace("<td>", "<td style='border: 1px solid #dddddd; padding: 8px; text-align: left;'>")
-    
     return html
 
 
