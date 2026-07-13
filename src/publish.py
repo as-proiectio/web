@@ -372,16 +372,20 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
             except Exception:
                 print("No temporary save popup detected or failed to dismiss.")
 
+            # Stability delay before loading template to ensure React handlers are ready
+            print("Waiting for editor toolbar initialization...")
+            page.wait_for_timeout(3000)
+
             print("Opening template sidebar...")
             try:
                 template_btn = editor_frame.locator(TEMPLATE_TOOLBAR_BUTTON).first
-                template_btn.wait_for(state="attached", timeout=10000)
+                template_btn.wait_for(state="visible", timeout=15000)
                 template_btn.click(force=True)
                 page.wait_for_timeout(1500)
                 
                 # Click the "내 템플릿" (My Templates) tab button
                 my_templates_tab = editor_frame.locator(MY_TEMPLATES_TAB_BUTTON).first
-                my_templates_tab.wait_for(state="visible", timeout=5000)
+                my_templates_tab.wait_for(state="visible", timeout=10000)
                 my_templates_tab.click(force=True)
                 page.wait_for_timeout(1000)
                 
@@ -498,9 +502,9 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
             # Proceed to Settings
             print("Clicking next button...")
             try:
-                # Find and click next button on the main page context
-                next_loc = page.locator(NEXT_BUTTON).first
-                next_loc.wait_for(state="attached", timeout=5000)
+                # Find and click next button on the editor_frame context (inside iframe)
+                next_loc = editor_frame.locator(NEXT_BUTTON).first
+                next_loc.wait_for(state="attached", timeout=10000)
                 next_loc.click(force=True)
                 page.wait_for_timeout(1000)
                 
