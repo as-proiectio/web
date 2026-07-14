@@ -1,212 +1,95 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap");
+@import "tailwindcss";
 
-:root {
-  --background: 220 20% 8%;
-  --foreground: 220 10% 94%;
-  --card: 220 18% 12%;
-  --card-hover: 220 18% 16%;
-  --accent: 250 85% 65%;
-  --accent-glow: 250 85% 65% / 0.15;
-  --border: 220 15% 18%;
-  --border-focus: 250 80% 50%;
-  --muted: 220 10% 65%;
-  --success: 142 70% 45%;
-  --warning: 38 92% 50%;
-  --danger: 0 84% 60%;
-
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg:
-    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-glow: 0 0 20px 0 var(--accent-glow);
-
-  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+@theme {
+  --font-pretendard: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui,
+    sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-hover: #f8fafc;
+  --accent: #2563eb;
+  --accent-light: #eff6ff;
+  --border: #e2e8f0;
+  --muted: #64748b;
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --card: #1e293b;
+  --card-hover: #334155;
+  --accent: #3b82f6;
+  --accent-light: rgba(59, 130, 246, 0.3);
+  --border: #334155;
+  --muted: #94a3b8;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
 }
 
 body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-  font-family:
-    "Pretendard",
-    "Inter",
-    -apple-system,
-    BlinkMacSystemFont,
-    system-ui,
-    sans-serif;
-  line-height: 1.6;
+  font-family: var(--font-pretendard);
+  background-color: var(--background);
+  color: var(--foreground);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-  transition: color var(--transition-fast);
-}
-
-button {
-  font-family: inherit;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-/* Premium Layout Elements */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem;
-}
-
-.premium-title {
-  font-family: "Outfit", sans-serif;
-  font-weight: 800;
-  background: linear-gradient(135deg, #fff 30%, hsl(var(--accent)) 100%);
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  letter-spacing: -0.03em;
-}
-
-/* Glassmorphism card style */
-.premium-card {
-  background-color: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-  border-radius: 16px;
-  padding: 1.75rem;
-  transition: all var(--transition-normal);
-  box-shadow: var(--shadow);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.premium-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.03) 0%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  pointer-events: none;
-}
-
-.premium-card:hover {
-  transform: translateY(-4px);
-  border-color: hsl(var(--accent) / 0.4);
-  background-color: hsl(var(--card-hover));
-  box-shadow:
-    var(--shadow-lg),
-    0 0 24px 0 hsl(var(--accent) / 0.1);
-}
-
-/* Premium Tabs Layout */
-.tabs-container {
-  display: flex;
-  gap: 0.5rem;
-  border-bottom: 1px solid hsl(var(--border));
-  padding-bottom: 0.75rem;
-  margin-bottom: 2rem;
-}
-
-.tab-btn {
-  padding: 0.75rem 1.25rem;
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: hsl(var(--muted));
-  border-radius: 8px;
-  transition: all var(--transition-fast);
-  position: relative;
-}
-
-.tab-btn:hover {
-  color: hsl(var(--foreground));
-  background-color: hsl(var(--card));
-}
-
-.tab-btn.active {
-  color: hsl(var(--foreground));
-  background-color: hsl(var(--card));
-  box-shadow: var(--shadow-sm);
-}
-
-.tab-btn.active::after {
-  content: "";
-  position: absolute;
-  bottom: -0.75rem;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: hsl(var(--accent));
-  box-shadow: 0 0 8px hsl(var(--accent));
-}
-
-/* Category Filter badges */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.badge-premium {
-  background-color: hsl(var(--accent) / 0.15);
-  color: hsl(var(--accent));
-  border: 1px solid hsl(var(--accent) / 0.3);
-}
-
-.badge-notice {
-  background-color: hsl(var(--warning) / 0.15);
-  color: hsl(var(--warning));
-  border: 1px solid hsl(var(--warning) / 0.3);
-}
-
-/* Grid card layouts */
-.grid-layout {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.5rem;
-}
-
-/* MDX/Prose enhancements */
+/* Prose styles for MDX content */
 .prose {
-  color: hsl(var(--foreground) / 0.9);
+  color: var(--foreground);
 }
 
 .prose h1,
 .prose h2,
 .prose h3 {
-  font-family: "Outfit", sans-serif;
-  color: hsl(var(--foreground));
+  color: var(--foreground);
   margin-top: 1.5rem;
   margin-bottom: 0.75rem;
 }
 
+.prose h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.prose h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.prose h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
 .prose p {
   margin-bottom: 1.25rem;
+  line-height: 1.625;
 }
 
 .prose code {
   font-family: ui-monospace, monospace;
-  background-color: hsl(var(--card));
+  background-color: var(--card);
   padding: 0.2rem 0.4rem;
   border-radius: 4px;
   font-size: 0.9em;
+}
+
+.prose a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.prose a:hover {
+  color: var(--foreground);
 }
