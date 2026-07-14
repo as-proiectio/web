@@ -59,45 +59,29 @@ export default async function NoticeDetailPage({ params }: PageProps) {
   });
 
   return (
-    <div className="container" style={{ maxWidth: 800 }}>
-      <header
-        style={{
-          marginBottom: "2rem",
-          borderBottom: "1px solid hsl(var(--border))",
-          paddingBottom: "1.5rem",
-        }}
-      >
-        <div style={{ marginBottom: "1rem" }}>
-          <span className="badge badge-notice">Notice</span>
+    <div className="max-w-content mx-auto px-4 py-8">
+      <header className="mb-8 pb-6 border-b border-slate-200 dark:border-slate-700">
+        <div className="mb-4">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+            Notice
+          </span>
         </div>
-        <h1
-          style={{
-            fontSize: "2.5rem",
-            fontWeight: 800,
-            marginBottom: "0.5rem",
-            color: "hsl(var(--foreground))",
-          }}
-        >
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-2">
           {frontmatter.title || slug}
         </h1>
         {(() => {
           const formattedDate = formatNoticeDate(frontmatter.date);
           return formattedDate ? (
-            <time style={{ color: "hsl(var(--muted))", fontSize: "0.9rem" }}>
+            <time className="text-slate-500 dark:text-slate-400 text-sm">
               {formattedDate}
             </time>
           ) : null;
         })()}
       </header>
 
-      <article className="prose" style={{ minHeight: "200px" }}>
-        {content}
-      </article>
+      <article className="prose min-h-[200px]">{content}</article>
 
-      {/* Adsense Integration */}
       <Adsense slot="4567890123" />
-
-      {/* Sponsorship Widget below article renderer */}
       <Sponsorship />
     </div>
   );
