@@ -1,8 +1,28 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { fetchSignalMarkdown } from "../../../../../src/services/github";
+import { fetchSignalMarkdown, fetchSignalList } from "../../../../../src/services/github";
 import { compileMDX } from "next-mdx-remote/rsc";
 import Header from "../../../../../src/components/Header";
+
+export const revalidate = 3600; // Revalidate every hour
+
+export async function generateStaticParams() {
+  try {
+    const list = await fetchSignalList();
+    return list.map((s) => {
+      const d = new Date(s.date);
+      const dateYMD = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+      return {
+        lang: s.lang,
+        type: s.category === "alpha_signal_premarket" ? "premarket" : "alpha",
+        date: dateYMD,
+      };
+    });
+  } catch (err) {
+    console.error("Failed to generate static params:", err);
+    return [];
+  }
+}
 
 interface SignalFrontmatter {
   title?: string;

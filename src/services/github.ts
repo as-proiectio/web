@@ -108,36 +108,17 @@ function buildSignalItem(
 }
 
 export async function fetchSignalList(): Promise<SignalListItem[]> {
-  const [reportFiles, premarketFiles] = await Promise.all([
-    listGitHubDir("report"),
-    listGitHubDir("premarket"),
-  ]);
+  const res = await githubFetch(
+    `https://api.github.com/repos/${REPO}/contents/signals.json`,
+    true,
+  );
 
-  const tasks: Promise<SignalListItem | null>[] = [];
-
-  for (const file of reportFiles) {
-    tasks.push(
-      fetchFileRaw("report", file).then((raw) =>
-        buildSignalItem(file, raw, "alpha_signal"),
-      ),
-    );
+  if (!res.ok) {
+    throw new Error(`Failed to fetch signals.json: ${res.statusText}`);
   }
 
-  for (const file of premarketFiles) {
-    tasks.push(
-      fetchFileRaw("premarket", file).then((raw) =>
-        buildSignalItem(file, raw, "alpha_signal_premarket"),
-      ),
-    );
-  }
-
-  const results = await Promise.allSettled(tasks);
-  const signals = results
-    .filter(
-      (r): r is PromiseFulfilledResult<SignalListItem> =>
-        r.status === "fulfilled" && r.value !== null,
-    )
-    .map((r) => r.value);
+  const rawText = await res.text();
+  const signals: SignalListItem[] = JSON.parse(rawText);
 
   signals.sort((a, b) => b.date.localeCompare(a.date));
 

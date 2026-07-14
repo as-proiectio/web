@@ -2,6 +2,8 @@ import React from "react";
 import fs from "fs/promises";
 import path from "path";
 import { compileMDX } from "next-mdx-remote/rsc";
+
+export const revalidate = 3600; // Revalidate every hour
 import Header from "../src/components/Header";
 import FilterBarClient from "../src/components/FilterBarClient";
 import { ContentItem } from "../src/components/ContentCard";
