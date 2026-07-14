@@ -5,8 +5,22 @@ import Link from "next/link";
 import { compileMDX } from "next-mdx-remote/rsc";
 
 interface NoticeFrontmatter {
-  title: string;
-  date: string;
+  title?: string;
+  date?: string;
+}
+
+function getSafeTime(dateStr: string | undefined): number {
+  if (!dateStr) return 0;
+  const time = new Date(dateStr).getTime();
+  return isNaN(time) ? 0 : time;
+}
+
+function formatNoticeDate(dateStr: string | undefined): string {
+  if (!dateStr) return "Unknown Date";
+  const dateObj = new Date(dateStr);
+  const time = dateObj.getTime();
+  if (isNaN(time)) return "Unknown Date";
+  return dateObj.toLocaleString("ko-KR");
 }
 
 export default async function NoticePage() {
@@ -40,7 +54,7 @@ export default async function NoticePage() {
   );
 
   // Sort notices by date descending
-  notices.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  notices.sort((a, b) => getSafeTime(b.date) - getSafeTime(a.date));
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto", padding: "2rem" }}>
@@ -54,7 +68,7 @@ export default async function NoticePage() {
               <Link href={`/notice/${notice.slug}`} style={{ textDecoration: "none", color: "#0070f3" }}>
                 <h2 style={{ fontSize: "1.25rem", margin: "0 0 0.5rem 0" }}>{notice.title}</h2>
               </Link>
-              <small style={{ color: "#666" }}>{new Date(notice.date).toLocaleString("ko-KR")}</small>
+              <small style={{ color: "#666" }}>{formatNoticeDate(notice.date)}</small>
             </li>
           ))}
         </ul>

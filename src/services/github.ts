@@ -1,5 +1,8 @@
 export async function fetchSignalMarkdown(lang: string, type: string, date: string): Promise<string> {
   const pat = process.env.GITHUB_PAT;
+  if (!pat) {
+    throw new Error("Missing GITHUB_PAT environment variable. Please configure it to fetch remote signal markdown.");
+  }
   const repo = "buddy-proiectio/data";
   const mappedType = type === "premarket" ? "alpha_signal_premarket" : "alpha_signal";
   const filename = lang === "ko" 
