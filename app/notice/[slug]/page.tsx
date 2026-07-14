@@ -62,11 +62,14 @@ export default async function NoticeDetailPage({ params }: PageProps) {
         <h1 style={{ fontSize: "2.5rem", fontWeight: 800, marginBottom: "0.5rem", color: "hsl(var(--foreground))" }}>
           {frontmatter.title || slug}
         </h1>
-        {formatNoticeDate(frontmatter.date) && (
-          <time style={{ color: "hsl(var(--muted))", fontSize: "0.9rem" }}>
-            {formatNoticeDate(frontmatter.date)}
-          </time>
-        )}
+        {(() => {
+          const formattedDate = formatNoticeDate(frontmatter.date);
+          return formattedDate ? (
+            <time style={{ color: "hsl(var(--muted))", fontSize: "0.9rem" }}>
+              {formattedDate}
+            </time>
+          ) : null;
+        })()}
       </header>
       
       <article className="prose" style={{ minHeight: "200px" }}>

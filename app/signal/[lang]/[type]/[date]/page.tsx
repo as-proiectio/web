@@ -21,13 +21,14 @@ interface PageProps {
 export default async function SignalDetailPage({ params }: PageProps) {
   const { lang, type, date } = await params;
 
-  if (lang !== "ko" && lang !== "en") {
-    notFound();
-  }
-  if (type !== "alpha" && type !== "premarket") {
-    notFound();
-  }
-  if (!/^\d{8}$/.test(date)) {
+  const VALID_LANGS = ["ko", "en"] as const;
+  const VALID_TYPES = ["alpha", "premarket"] as const;
+
+  const isValidLang = VALID_LANGS.includes(lang as typeof VALID_LANGS[number]);
+  const isValidType = VALID_TYPES.includes(type as typeof VALID_TYPES[number]);
+  const isValidDate = /^\d{8}$/.test(date);
+
+  if (!isValidLang || !isValidType || !isValidDate) {
     notFound();
   }
 

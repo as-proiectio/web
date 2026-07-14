@@ -29,12 +29,19 @@ export default function PremiumDashboard({ notices, initialSignals }: PremiumDas
   const [activeTab, setActiveTab] = useState<'notice' | 'alpha' | 'premarket'>('alpha');
   const [langFilter, setLangFilter] = useState<'all' | 'ko' | 'en'>('all');
 
-  const filteredNotices = notices;
-  
-  const filteredSignals = initialSignals.filter(signal => {
-    if (signal.type !== activeTab) return false;
-    if (langFilter !== 'all' && signal.lang !== langFilter) return false;
-    return true;
+  const filteredSignals = initialSignals.filter(
+    signal => signal.type === activeTab && (langFilter === 'all' || signal.lang === langFilter)
+  );
+
+  const langButtonStyle = (value: 'all' | 'ko' | 'en'): React.CSSProperties => ({
+    padding: "0.4rem 0.8rem",
+    borderRadius: "6px",
+    fontSize: "0.85rem",
+    fontWeight: 500,
+    backgroundColor: langFilter === value ? 'hsl(var(--accent) / 0.2)' : 'transparent',
+    color: langFilter === value ? 'hsl(var(--foreground))' : 'hsl(var(--muted))',
+    border: `1px solid ${langFilter === value ? 'hsl(var(--accent) / 0.4)' : 'hsl(var(--border))'}`,
+    transition: "all var(--transition-fast)"
   });
 
   const formatDate = (dateStr: string) => {
@@ -103,63 +110,21 @@ export default function PremiumDashboard({ notices, initialSignals }: PremiumDas
       {activeTab !== 'notice' && (
         <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem", alignItems: "center" }}>
           <span style={{ fontSize: "0.85rem", color: "hsl(var(--muted))", marginRight: "0.5rem" }}>Language:</span>
-          <button 
-            style={{
-              padding: "0.4rem 0.8rem",
-              borderRadius: "6px",
-              fontSize: "0.85rem",
-              fontWeight: 500,
-              backgroundColor: langFilter === 'all' ? 'hsl(var(--accent) / 0.2)' : 'transparent',
-              color: langFilter === 'all' ? 'hsl(var(--foreground))' : 'hsl(var(--muted))',
-              border: `1px solid ${langFilter === 'all' ? 'hsl(var(--accent) / 0.4)' : 'hsl(var(--border))'}`,
-              transition: "all var(--transition-fast)"
-            }}
-            onClick={() => setLangFilter('all')}
-          >
-            All
-          </button>
-          <button 
-            style={{
-              padding: "0.4rem 0.8rem",
-              borderRadius: "6px",
-              fontSize: "0.85rem",
-              fontWeight: 500,
-              backgroundColor: langFilter === 'ko' ? 'hsl(var(--accent) / 0.2)' : 'transparent',
-              color: langFilter === 'ko' ? 'hsl(var(--foreground))' : 'hsl(var(--muted))',
-              border: `1px solid ${langFilter === 'ko' ? 'hsl(var(--accent) / 0.4)' : 'hsl(var(--border))'}`,
-              transition: "all var(--transition-fast)"
-            }}
-            onClick={() => setLangFilter('ko')}
-          >
-            한국어 (KO)
-          </button>
-          <button 
-            style={{
-              padding: "0.4rem 0.8rem",
-              borderRadius: "6px",
-              fontSize: "0.85rem",
-              fontWeight: 500,
-              backgroundColor: langFilter === 'en' ? 'hsl(var(--accent) / 0.2)' : 'transparent',
-              color: langFilter === 'en' ? 'hsl(var(--foreground))' : 'hsl(var(--muted))',
-              border: `1px solid ${langFilter === 'en' ? 'hsl(var(--accent) / 0.4)' : 'hsl(var(--border))'}`,
-              transition: "all var(--transition-fast)"
-            }}
-            onClick={() => setLangFilter('en')}
-          >
-            English (EN)
-          </button>
+          <button style={langButtonStyle('all')} onClick={() => setLangFilter('all')}>All</button>
+          <button style={langButtonStyle('ko')} onClick={() => setLangFilter('ko')}>한국어 (KO)</button>
+          <button style={langButtonStyle('en')} onClick={() => setLangFilter('en')}>English (EN)</button>
         </div>
       )}
 
       {/* Grid Layout for Cards */}
       <div className="grid-layout">
         {activeTab === 'notice' ? (
-          filteredNotices.length === 0 ? (
+          notices.length === 0 ? (
             <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "3rem", color: "hsl(var(--muted))" }}>
               등록된 공지사항이 없습니다.
             </div>
           ) : (
-            filteredNotices.map((notice) => (
+            notices.map((notice) => (
               <Link href={`/notice/${notice.slug}`} key={notice.slug} className="premium-card">
                 <div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
