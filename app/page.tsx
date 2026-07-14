@@ -2,10 +2,11 @@ import React from "react";
 import fs from "fs/promises";
 import path from "path";
 import { compileMDX } from "next-mdx-remote/rsc";
-import PremiumDashboard, {
-  NoticeData,
-  SignalData,
-} from "../src/components/PremiumDashboard";
+import Header from "../src/components/Header";
+import FilterBarClient from "../src/components/FilterBarClient";
+import { ContentItem } from "../src/components/ContentCard";
+import Sponsorship from "../src/components/Sponsorship";
+import Adsense from "../src/components/Adsense";
 import Analytics from "../src/components/Analytics";
 
 interface NoticeFrontmatter {
@@ -32,7 +33,7 @@ export default async function Home() {
     (file) => file.endsWith(".mdx") || file.endsWith(".md"),
   );
 
-  const notices: NoticeData[] = await Promise.all(
+  const notices: ContentItem[] = await Promise.all(
     mdxFiles.map(async (file) => {
       const slug = file.replace(/\.mdx?$/, "");
       const filePath = path.join(dirPath, file);
@@ -44,9 +45,12 @@ export default async function Home() {
       });
 
       return {
+        type: "notice" as const,
         slug,
         title: frontmatter.title || slug,
         date: frontmatter.date || "",
+        category: "notice",
+        href: `/notice/${slug}`,
       };
     }),
   );
@@ -54,13 +58,19 @@ export default async function Home() {
   // Sort notices by date descending
   notices.sort((a, b) => getSafeTime(b.date) - getSafeTime(a.date));
 
-  // Define premium signals matching data in buddy-proiectio/data repo
-  const signals: SignalData[] = [];
+  // Define signals (empty for now, will be populated from GitHub API)
+  const signals: ContentItem[] = [];
+
+  // Combine all items for "all" category
+  const allItems: ContentItem[] = [...notices, ...signals];
 
   return (
     <>
       <Analytics gaId="G-BUDDYPREM" />
-      <PremiumDashboard notices={notices} initialSignals={signals} />
+      <Header />
+      <FilterBarClient allItems={allItems} notices={notices} signals={signals} />
+      <Adsense slot="9876543210" />
+      <Sponsorship />
     </>
   );
 }
