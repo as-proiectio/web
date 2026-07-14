@@ -2,6 +2,8 @@ import React from "react";
 import { notFound } from "next/navigation";
 import { fetchSignalMarkdown } from "../../../../../src/services/github";
 import { compileMDX } from "next-mdx-remote/rsc";
+import Sponsorship from "../../../../../src/components/Sponsorship";
+import Adsense from "../../../../../src/components/Adsense";
 
 interface SignalFrontmatter {
   title?: string;
@@ -34,18 +36,30 @@ export default async function SignalDetailPage({ params }: PageProps) {
   });
 
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: "2rem" }}>
-      <header style={{ marginBottom: "2rem", borderBottom: "1px solid #eee", paddingBottom: "1rem" }}>
-        <h1 style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>
+    <div className="container" style={{ maxWidth: 800 }}>
+      <header style={{ marginBottom: "2rem", borderBottom: "1px solid hsl(var(--border))", paddingBottom: "1.5rem" }}>
+        <div style={{ marginBottom: "1rem" }}>
+          <span className="badge badge-premium">
+            {type.toUpperCase()} SIGNAL ({lang.toUpperCase()})
+          </span>
+        </div>
+        <h1 style={{ fontSize: "2.5rem", fontWeight: 800, marginBottom: "0.5rem", color: "hsl(var(--foreground))" }}>
           {frontmatter.title || `${type.toUpperCase()} Signal (${lang.toUpperCase()})`}
         </h1>
-        <time style={{ color: "#666" }}>
+        <time style={{ color: "hsl(var(--muted))", fontSize: "0.9rem" }}>
           {frontmatter.date || date}
         </time>
       </header>
-      <article className="prose" style={{ lineHeight: 1.6 }}>
+
+      <article className="prose" style={{ minHeight: "200px" }}>
         {content}
       </article>
+
+      {/* Adsense Integration */}
+      <Adsense slot="7890123456" />
+
+      {/* Sponsorship Widget below article renderer */}
+      <Sponsorship />
     </div>
   );
 }

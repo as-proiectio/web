@@ -3,6 +3,8 @@ import fs from "fs/promises";
 import path from "path";
 import { notFound } from "next/navigation";
 import { compileMDX } from "next-mdx-remote/rsc";
+import Sponsorship from "../../../src/components/Sponsorship";
+import Adsense from "../../../src/components/Adsense";
 
 interface NoticeFrontmatter {
   title?: string;
@@ -52,18 +54,30 @@ export default async function NoticeDetailPage({ params }: PageProps) {
   });
 
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto", padding: "2rem" }}>
-      <header style={{ marginBottom: "2rem", borderBottom: "1px solid #eee", paddingBottom: "1rem" }}>
-        <h1 style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>{frontmatter.title || slug}</h1>
+    <div className="container" style={{ maxWidth: 800 }}>
+      <header style={{ marginBottom: "2rem", borderBottom: "1px solid hsl(var(--border))", paddingBottom: "1.5rem" }}>
+        <div style={{ marginBottom: "1rem" }}>
+          <span className="badge badge-notice">Notice</span>
+        </div>
+        <h1 style={{ fontSize: "2.5rem", fontWeight: 800, marginBottom: "0.5rem", color: "hsl(var(--foreground))" }}>
+          {frontmatter.title || slug}
+        </h1>
         {formatNoticeDate(frontmatter.date) && (
-          <time style={{ color: "#666" }}>
+          <time style={{ color: "hsl(var(--muted))", fontSize: "0.9rem" }}>
             {formatNoticeDate(frontmatter.date)}
           </time>
         )}
       </header>
-      <article className="prose" style={{ lineHeight: 1.6 }}>
+      
+      <article className="prose" style={{ minHeight: "200px" }}>
         {content}
       </article>
+
+      {/* Adsense Integration */}
+      <Adsense slot="4567890123" />
+
+      {/* Sponsorship Widget below article renderer */}
+      <Sponsorship />
     </div>
   );
 }
