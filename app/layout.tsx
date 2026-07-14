@@ -1,5 +1,11 @@
 import React from "react";
+import { ThemeProvider } from "next-themes";
 import "./globals.css";
+
+export const metadata = {
+  title: "AlphaSignal",
+  description: "AI-powered market alpha signals and analysis",
+};
 
 export default function RootLayout({
   children,
@@ -7,8 +13,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ko">
-      <body>{children}</body>
+    <html lang="ko" suppressHydrationWarning>
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+        />
+      </head>
+      <body className="font-pretendard antialiased">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange={false}
+        >
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
