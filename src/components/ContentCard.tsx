@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { calcReadingTime, formatReadingTime } from "../utils/reading-time";
+import { calcReadingTime, formatReadingTime } from "@/utils/reading-time";
 
 export interface ContentItem {
   type: "notice" | "signal";

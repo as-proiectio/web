@@ -1,5 +1,5 @@
-import { calcReadingTime } from "../utils/reading-time";
-import { extractExcerpt } from "../utils/extract-excerpt";
+import { calcReadingTime } from "@/utils/reading-time";
+import { extractExcerpt } from "@/utils/extract-excerpt";
 
 export interface SignalFrontmatter {
   title: string;

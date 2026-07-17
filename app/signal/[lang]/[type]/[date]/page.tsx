@@ -1,8 +1,9 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { fetchSignalMarkdown, fetchSignalList } from "../../../../../src/services/github";
+import { fetchSignalMarkdown, fetchSignalList } from "@/services/github";
 import { compileMDX } from "next-mdx-remote/rsc";
-import Header from "../../../../../src/components/Header";
+import Header from "@/components/Header";
+import { formatSignalDate } from "@/utils/format-date";
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -86,7 +87,7 @@ export default async function SignalDetailPage({ params }: PageProps) {
               `${type.toUpperCase()} Signal (${lang.toUpperCase()})`}
           </h1>
           <time className="text-slate-500 dark:text-slate-400 text-sm">
-            {frontmatter.date || date}
+            {formatSignalDate(frontmatter.date || date)}
           </time>
         </header>
 
