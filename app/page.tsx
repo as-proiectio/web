@@ -1,9 +1,9 @@
-import React from "react";
-import Header from "../src/components/Header";
-import Adsense from "../src/components/Adsense";
-import { fetchSignalList, fetchSignalMarkdown } from "../src/services/github";
+import Header from "@/components/Header";
+import Adsense from "@/components/Adsense";
+import { fetchSignalList, fetchSignalMarkdown } from "@/services/github";
 import { compileMDX } from "next-mdx-remote/rsc";
 import Link from "next/link";
+import { formatSignalDate } from "@/utils/format-date";
 
 interface PageProps {
   searchParams: Promise<{
@@ -174,7 +174,7 @@ export default async function Home({ searchParams }: PageProps) {
                 <span>💡</span>
                 <span>
                   오늘 자 리포트가 아직 준비되지 않아, 가장 최신 리포트(
-                  {currentSignal.date})를 표시합니다.
+                  {formatSignalDate(currentSignal.date)})를 표시합니다.
                 </span>
               </div>
             )}
@@ -189,7 +189,7 @@ export default async function Home({ searchParams }: PageProps) {
                   {currentSignal.title}
                 </h1>
                 <time className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                  {currentSignal.date}
+                  {formatSignalDate(currentSignal.date)}
                 </time>
               </div>
             )}
@@ -239,7 +239,7 @@ export default async function Home({ searchParams }: PageProps) {
                         }`}
                       >
                         <time className="block text-[10px] font-mono text-slate-400 dark:text-slate-500 mb-1">
-                          {item.date}
+                          {formatSignalDate(item.date)}
                         </time>
                         <h4 className="text-xs font-bold line-clamp-2 leading-snug">
                           {item.title}
@@ -278,7 +278,7 @@ export default async function Home({ searchParams }: PageProps) {
                       }`}
                     >
                       <time className="block text-[10px] font-mono text-slate-400 dark:text-slate-500 mb-0.5">
-                        {item.date}
+                        {formatSignalDate(item.date)}
                       </time>
                       <h4 className="text-xs line-clamp-1 leading-snug">
                         {item.title}

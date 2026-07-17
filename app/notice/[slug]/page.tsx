@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import { notFound } from "next/navigation";
 import { compileMDX } from "next-mdx-remote/rsc";
-import Header from "../../../src/components/Header";
+import Header from "@/components/Header";
 
 interface NoticeFrontmatter {
   title?: string;

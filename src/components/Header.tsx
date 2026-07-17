@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
-import { getLatestNotice } from "../utils/get-latest-notice";
+import { getLatestNotice } from "@/utils/get-latest-notice";
 
 // TODO: real-time market data, not hard coding
 const marketData = [

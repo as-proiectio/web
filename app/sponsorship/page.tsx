@@ -1,6 +1,6 @@
 import React from "react";
-import Header from "../../src/components/Header";
-import Sponsorship from "../../src/components/Sponsorship";
+import Header from "@/components/Header";
+import Sponsorship from "@/components/Sponsorship";
 
 export const metadata = {
   title: "후원하기 | AlphaSignal",
