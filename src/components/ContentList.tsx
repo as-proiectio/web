@@ -38,7 +38,7 @@ export default function ContentList({
           <ContentCard key={`${item.type}-${item.slug || index}`} item={item} />
         ))}
       </div>
-      
+
       {hasMore && (
         <div className="flex justify-center mt-8">
           <button

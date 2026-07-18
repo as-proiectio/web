@@ -45,12 +45,20 @@ export default function TimeTicker() {
   return (
     <div className="hidden sm:flex items-center gap-4 text-[10px] font-mono text-slate-500 dark:text-slate-400">
       <div className="flex items-center gap-1">
-        <span className="text-slate-400 dark:text-slate-500 font-semibold">SEL</span>
-        <span className="text-slate-700 dark:text-slate-300 tabular-nums">{seoulTime}</span>
+        <span className="text-slate-400 dark:text-slate-500 font-semibold">
+          SEL
+        </span>
+        <span className="text-slate-700 dark:text-slate-300 tabular-nums">
+          {seoulTime}
+        </span>
       </div>
       <div className="flex items-center gap-1">
-        <span className="text-slate-400 dark:text-slate-500 font-semibold">NYC</span>
-        <span className="text-slate-700 dark:text-slate-300 tabular-nums">{nyTime}</span>
+        <span className="text-slate-400 dark:text-slate-500 font-semibold">
+          NYC
+        </span>
+        <span className="text-slate-700 dark:text-slate-300 tabular-nums">
+          {nyTime}
+        </span>
       </div>
     </div>
   );

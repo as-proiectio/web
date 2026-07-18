@@ -14,7 +14,7 @@ function getEasterDate(year: number): Date {
   const m = Math.floor((a + 11 * h + 22 * l) / 451);
   const month = Math.floor((h + l - 7 * m + 114) / 31); // 3 = March, 4 = April
   const day = ((h + l - 7 * m + 114) % 31) + 1;
-  
+
   // Return Date in UTC to avoid timezone issues during calculation
   return new Date(Date.UTC(year, month - 1, day));
 }
@@ -22,11 +22,22 @@ function getEasterDate(year: number): Date {
 function getGoodFriday(year: number): Date {
   const easter = getEasterDate(year);
   // Subtract 2 days (Friday is 2 days before Easter Sunday)
-  return new Date(Date.UTC(easter.getUTCFullYear(), easter.getUTCMonth(), easter.getUTCDate() - 2));
+  return new Date(
+    Date.UTC(
+      easter.getUTCFullYear(),
+      easter.getUTCMonth(),
+      easter.getUTCDate() - 2,
+    ),
+  );
 }
 
 // Helper to find specific weekday occurrence in a month
-function getWeekdayOfMonth(year: number, month: number, weekday: number, occurrence: number): Date {
+function getWeekdayOfMonth(
+  year: number,
+  month: number,
+  weekday: number,
+  occurrence: number,
+): Date {
   // weekday: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
   // occurrence: 1 = 1st, 2 = 2nd, 3 = 3rd, 4 = 4th, -1 = last
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -39,14 +50,20 @@ function getWeekdayOfMonth(year: number, month: number, weekday: number, occurre
     }
   }
 
-  const selectedDay = occurrence === -1 
-    ? candidates[candidates.length - 1] 
-    : candidates[occurrence - 1];
+  const selectedDay =
+    occurrence === -1
+      ? candidates[candidates.length - 1]
+      : candidates[occurrence - 1];
 
   return new Date(Date.UTC(year, month, selectedDay));
 }
 
-function getObservedDate(year: number, month: number, day: number, options = { skipSat: false }): Date {
+function getObservedDate(
+  year: number,
+  month: number,
+  day: number,
+  options = { skipSat: false },
+): Date {
   const date = new Date(year, month, day);
   const dayOfWeek = date.getDay(); // 0 = Sun, 6 = Sat
 
