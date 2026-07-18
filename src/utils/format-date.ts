@@ -1,6 +1,14 @@
 export function formatSignalDate(dateStr: string): string {
   if (!dateStr) return "";
 
+  // Check if it is a pure 8-digit string
+  if (/^\d{8}$/.test(dateStr)) {
+    const year = dateStr.slice(0, 4);
+    const month = dateStr.slice(4, 6);
+    const day = dateStr.slice(6, 8);
+    return `${year}.${month}.${day}.`;
+  }
+
   // Check if the original string has time information (contains 'T' or ':')
   const hasTime = dateStr.includes("T") || dateStr.includes(":");
   if (!hasTime) {
