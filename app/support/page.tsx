@@ -15,7 +15,7 @@ export default function SupportPage() {
           Alpha Signals 후원하기
         </h1>
         <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 leading-relaxed">
-          우리는 지속가능하고 깨끗한 금융 정보 분석 제공을 추구합니다.
+          우리는 지속가능하고 깨끗한 금융 정보 제공을 추구합니다.
         </p>
       </header>
 
