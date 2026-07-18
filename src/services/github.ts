@@ -98,8 +98,7 @@ function buildSignalItem(
   return {
     title: fm.title || file,
     date: fm.date || "",
-    category:
-      (fm.category as SignalFrontmatter["category"]) || defaultCategory,
+    category: (fm.category as SignalFrontmatter["category"]) || defaultCategory,
     lang,
     filename: file,
     readingMinutes: calcReadingTime(raw, lang),

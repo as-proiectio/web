@@ -86,7 +86,7 @@ export default async function SignalDetailPage({ params }: PageProps) {
             {frontmatter.title ||
               `${type.toUpperCase()} Signal (${lang.toUpperCase()})`}
           </h1>
-          <time className="text-slate-500 dark:text-slate-400 text-sm">
+          <time suppressHydrationWarning className="text-slate-500 dark:text-slate-400 text-sm">
             {formatSignalDate(frontmatter.date || date)}
           </time>
         </header>

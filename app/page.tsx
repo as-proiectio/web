@@ -32,8 +32,10 @@ const getKstDateString = () => {
   return kst.toISOString().split("T")[0]; // YYYY-MM-DD
 };
 
-
-function shouldShowFallbackWarning(activeTab: "alpha" | "premarket", hasTodayReport: boolean): boolean {
+function shouldShowFallbackWarning(
+  activeTab: "alpha" | "premarket",
+  hasTodayReport: boolean,
+): boolean {
   if (hasTodayReport) return false;
 
   // Get current time in KST (UTC+9)
@@ -77,9 +79,7 @@ export default async function Home({ searchParams }: PageProps) {
     const list = await fetchSignalList();
     // Filter signals by tab and language
     const targetCategory =
-      activeTab === "premarket"
-        ? "alpha_signal_premarket"
-        : "alpha_signal";
+      activeTab === "premarket" ? "alpha_signal_premarket" : "alpha_signal";
 
     signals = list.filter(
       (s) => s.category === targetCategory && s.lang === activeLang,
@@ -142,10 +142,8 @@ export default async function Home({ searchParams }: PageProps) {
       <Header />
       <main className="max-w-[1200px] mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start">
-          
           {/* Left Column: Content Terminal */}
           <div className="flex flex-col gap-6">
-            
             {/* Control Bar */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
               {/* Tabs: Alpha Signal / Premarket */}
@@ -212,13 +210,10 @@ export default async function Home({ searchParams }: PageProps) {
             {/* Document Header Info */}
             {currentSignal && (
               <div className="flex flex-col gap-2">
-                <div className="text-xs font-mono text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                  Terminal Terminal Terminal
-                </div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50 leading-tight">
                   {currentSignal.title}
                 </h1>
-                <time className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                <time className="text-xs text-slate-500 dark:text-slate-400">
                   {formatSignalDate(currentSignal.date)}
                 </time>
               </div>
@@ -238,7 +233,9 @@ export default async function Home({ searchParams }: PageProps) {
               ) : (
                 <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-600 gap-2">
                   <span className="text-3xl">📁</span>
-                  <p className="text-sm font-medium">조회 가능한 리포트가 없습니다.</p>
+                  <p className="text-sm font-medium">
+                    조회 가능한 리포트가 없습니다.
+                  </p>
                 </div>
               )}
             </div>
@@ -246,7 +243,7 @@ export default async function Home({ searchParams }: PageProps) {
             {/* Mobile Bottom Layout (Ad & Archive) */}
             <div className="block lg:hidden flex flex-col gap-6 mt-4">
               <Adsense slot="mobile_bottom_banner" format="horizontal" />
-              
+
               {/* Archive Section */}
               <div className="flex flex-col gap-3">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
@@ -280,12 +277,10 @@ export default async function Home({ searchParams }: PageProps) {
                 </div>
               </div>
             </div>
-
           </div>
 
           {/* Right Column: Sidebar (LG screens only) */}
           <aside className="hidden lg:block sticky top-24 flex flex-col gap-6">
-            
             {/* Archive Section */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-4 flex flex-col gap-4">
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-slate-800">
@@ -336,7 +331,8 @@ export default async function Home({ searchParams }: PageProps) {
               <div className="flex flex-col gap-1">
                 <h4 className="text-sm font-bold">트레이딩뷰 최대 할인 혜택</h4>
                 <p className="text-[11px] text-slate-400 leading-normal">
-                  파트너 레퍼럴 링크로 가입하고 프리미엄 차트 기능 및 실시간 데이터 할인 혜택을 받아보세요.
+                  파트너 레퍼럴 링크로 가입하고 프리미엄 차트 기능 및 실시간
+                  데이터 할인 혜택을 받아보세요.
                 </p>
               </div>
               <a
@@ -348,9 +344,7 @@ export default async function Home({ searchParams }: PageProps) {
                 할인 혜택 받으러 가기
               </a>
             </div>
-
           </aside>
-
         </div>
       </main>
     </>
