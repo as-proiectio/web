@@ -4,6 +4,7 @@ import { fetchSignalMarkdown, fetchSignalList } from "@/services/github";
 import { compileMDX } from "next-mdx-remote/rsc";
 import LocalDate from "@/components/LocalDate";
 import Disclaimer from "@/components/Disclaimer";
+import ShareButton from "@/components/ShareButton";
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -83,9 +84,17 @@ export default async function SignalDetailPage({ params }: PageProps) {
           {frontmatter.title ||
             `${type.toUpperCase()} Signal (${lang.toUpperCase()})`}
         </h1>
-        <time className="text-slate-500 dark:text-slate-400 text-sm">
-          <LocalDate dateStr={frontmatter.date || date} />
-        </time>
+        <div className="flex items-center justify-between gap-4">
+          <time className="text-slate-500 dark:text-slate-400 text-sm">
+            <LocalDate dateStr={frontmatter.date || date} />
+          </time>
+          <ShareButton
+            title={
+              frontmatter.title ||
+              `${type.toUpperCase()} Signal (${lang.toUpperCase()})`
+            }
+          />
+        </div>
       </header>
 
       <article className="prose min-h-[200px]">{content}</article>

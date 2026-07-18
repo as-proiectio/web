@@ -1,5 +1,6 @@
 import Adsense from "@/components/Adsense";
 import Disclaimer from "@/components/Disclaimer";
+import ShareButton from "@/components/ShareButton";
 import { fetchSignalList, fetchSignalMarkdown } from "@/services/github";
 import { compileMDX } from "next-mdx-remote/rsc";
 import Link from "next/link";
@@ -176,7 +177,29 @@ export default async function Home({ searchParams }: PageProps) {
     fetchError = "데이터베이스 연결 실패. 잠시 후 다시 시도해주세요.";
   }
 
-  const archiveList = signals.slice(0, 5);
+  let archiveList = signals.slice(0, 5);
+  if (currentSignal && signals.length > 0) {
+    const currentIndex = signals.findIndex(
+      (s) => s.date === currentSignal.date,
+    );
+    if (currentIndex !== -1) {
+      let start = currentIndex - 2;
+      let end = currentIndex + 2;
+
+      if (start < 0) {
+        end += Math.abs(start);
+        start = 0;
+      }
+      if (end >= signals.length) {
+        start -= end - signals.length + 1;
+        end = signals.length - 1;
+      }
+      start = Math.max(0, start);
+      end = Math.min(signals.length - 1, end);
+
+      archiveList = signals.slice(start, end + 1);
+    }
+  }
   const dateYMD = currentSignal
     ? currentSignal.date.slice(0, 10).replace(/-/g, "")
     : "";
@@ -255,9 +278,12 @@ export default async function Home({ searchParams }: PageProps) {
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50 leading-tight">
                 {currentSignal.title}
               </h1>
-              <time className="text-xs text-slate-500 dark:text-slate-400">
-                <LocalDate dateStr={currentSignal.date} />
-              </time>
+              <div className="flex items-center justify-between gap-4">
+                <time className="text-xs text-slate-500 dark:text-slate-400">
+                  <LocalDate dateStr={currentSignal.date} />
+                </time>
+                <ShareButton title={currentSignal.title} />
+              </div>
             </div>
           )}
 
