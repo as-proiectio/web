@@ -2,7 +2,7 @@ import React from "react";
 import Support from "@/components/Support";
 
 export const metadata = {
-  title: "후원하기 | Alpha Signals",
+  title: "후원하기",
   description:
     "Alpha Signals의 양질의 투자 정보 분석을 지원해주세요. 후원금은 데이터 서버 유지 및 분석 시스템 고도화에 전액 사용됩니다.",
 };
