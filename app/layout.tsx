@@ -6,12 +6,12 @@ import Footer from "@/components/Footer";
 
 export const metadata = {
   title: {
-    default: "알파시그널 (AlphaSignal) | 깨끗한 미국 주식 리포트",
-    template: "%s | 알파시그널",
+    default: "Alpha Signals - 미국 주식 리포트",
+    template: "%s | Alpha Signals",
   },
   description:
     "우리는 지속가능하고 깨끗한 금융 정보 제공을 추구합니다. 자체 개발 AI 알고리즘이 추출한 미국 주식 매크로 지표, 실시간 주요 외신, SEC 공시 분석을 선제적으로 제공하는 100% 순수 데이터 리포트 매체입니다.",
-  metadataBase: new URL("https://alphasignals.co"),
+  metadataBase: new URL("https://alphasignals.vercel.app"),
   alternates: {
     canonical: "/",
   },
@@ -24,11 +24,11 @@ export const metadata = {
     apple: "/icon.svg",
   },
   openGraph: {
-    title: "알파시그널 (AlphaSignal) | 깨끗한 미국 주식 리포트",
+    title: "Alpha Signals - 미국 주식 리포트",
     description:
       "우리는 지속가능하고 깨끗한 금융 정보 제공을 추구합니다. 광고와 소음이 배제된 미국 주식 1차 출처 데이터 리포트.",
-    url: "https://alphasignals.co",
-    siteName: "AlphaSignal",
+    url: "https://alphasignals.vercel.app",
+    siteName: "Alpha Signals",
     locale: "ko_KR",
     type: "website",
     images: [
@@ -36,13 +36,13 @@ export const metadata = {
         url: "/logo-light.png",
         width: 512,
         height: 512,
-        alt: "AlphaSignal Logo",
+        alt: "Alpha Signals Logo",
       },
     ],
   },
   twitter: {
     card: "summary",
-    title: "알파시그널 (AlphaSignal) | 깨끗한 미국 주식 리포트",
+    title: "Alpha Signals - 미국 주식 리포트",
     description:
       "우리는 지속가능하고 깨끗한 금융 정보 제공을 추구합니다. 광고와 소음이 배제된 미국 주식 1차 출처 데이터 리포트.",
     images: ["/logo-light.png"],

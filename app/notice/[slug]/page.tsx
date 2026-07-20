@@ -10,8 +10,6 @@ interface NoticeFrontmatter {
   date?: string;
 }
 
-
-
 interface PageProps {
   params: Promise<{
     slug: string;
