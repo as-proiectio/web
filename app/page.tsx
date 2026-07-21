@@ -166,7 +166,7 @@ export default async function Home({ searchParams }: PageProps) {
         currentSignal = signals[0];
 
         const todayKst = getKstDateString();
-        const hasTodayReport = currentSignal?.date === todayKst;
+        const hasTodayReport = currentSignal?.date?.slice(0, 10) === todayKst;
         if (shouldShowFallbackWarning(activeTab, hasTodayReport)) {
           isRollback = true;
         }
