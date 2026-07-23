@@ -5,6 +5,7 @@ import { compileMDX } from "next-mdx-remote/rsc";
 import LocalDate from "@/components/LocalDate";
 import Disclaimer from "@/components/Disclaimer";
 import ShareButton from "@/components/ShareButton";
+import { sanitizeMarkdownForMdx } from "@/utils/sanitize-mdx";
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -67,10 +68,24 @@ export default async function SignalDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const { content, frontmatter } = await compileMDX<SignalFrontmatter>({
-    source: rawMarkdown,
-    options: { parseFrontmatter: true },
-  });
+  let content: React.ReactNode;
+  let frontmatter: SignalFrontmatter = {};
+
+  try {
+    const sanitized = sanitizeMarkdownForMdx(rawMarkdown);
+    const mdxResult = await compileMDX<SignalFrontmatter>({
+      source: sanitized,
+      options: { parseFrontmatter: true },
+    });
+    content = mdxResult.content;
+    frontmatter = mdxResult.frontmatter || {};
+  } catch (err) {
+    console.error(
+      `Failed to compile MDX for signal (${lang}/${type}/${date}):`,
+      err,
+    );
+    notFound();
+  }
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">

@@ -1,6 +1,7 @@
 import Adsense from "@/components/Adsense";
 import Disclaimer from "@/components/Disclaimer";
 import ShareButton from "@/components/ShareButton";
+import { sanitizeMarkdownForMdx } from "@/utils/sanitize-mdx";
 import { fetchSignalList, fetchSignalMarkdown } from "@/services/github";
 import { compileMDX } from "next-mdx-remote/rsc";
 import Link from "next/link";
@@ -44,8 +45,9 @@ async function ReportViewerContent({
       dateYMD,
     );
 
+    const sanitized = sanitizeMarkdownForMdx(rawMarkdown);
     const { content } = await compileMDX<SignalFrontmatter>({
-      source: rawMarkdown,
+      source: sanitized,
       options: { parseFrontmatter: true },
     });
 
