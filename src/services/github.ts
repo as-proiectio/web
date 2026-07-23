@@ -116,7 +116,7 @@ export async function fetchSignalList(): Promise<SignalListItem[]> {
   const rawText = await res.text();
   const signals: SignalListItem[] = JSON.parse(rawText);
 
-  signals.sort((a, b) => b.date.localeCompare(a.date));
+  signals.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
 
   return signals;
 }
