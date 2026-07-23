@@ -27,7 +27,7 @@ export default function Adsense({
   }, []);
 
   return (
-    <div className="w-full my-4 text-center overflow-hidden min-h-[90px] flex justify-center items-center">
+    <div className="w-full my-4 text-center overflow-hidden min-h-22.5 flex justify-center items-center">
       <ins
         className="adsbygoogle"
         style={style}
