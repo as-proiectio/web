@@ -53,4 +53,11 @@ describe("shouldShowFallbackWarning with America/New_York market time", () => {
     );
     expect(resultBefore).toBe(false);
   });
+
+  it("returns false on US market holidays in NY time", () => {
+    // 2026-07-03 is Friday (Independence Day observed)
+    const holidayNy = new Date("2026-07-03T10:00:00-04:00");
+    const result = shouldShowFallbackWarning("alpha", false, holidayNy);
+    expect(result).toBe(false);
+  });
 });

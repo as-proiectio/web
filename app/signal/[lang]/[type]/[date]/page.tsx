@@ -6,6 +6,7 @@ import LocalDate from "@/components/LocalDate";
 import Disclaimer from "@/components/Disclaimer";
 import ShareButton from "@/components/ShareButton";
 import { sanitizeMarkdownForMdx } from "@/utils/sanitize-mdx";
+import { getSignalReportDateYMD } from "@/utils/format-date";
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -13,7 +14,7 @@ export async function generateStaticParams() {
   try {
     const list = await fetchSignalList();
     return list.map((s) => {
-      const dateYMD = s.date.slice(0, 10).replace(/-/g, "");
+      const dateYMD = getSignalReportDateYMD(s);
       return {
         lang: s.lang,
         type: s.category === "alpha_signal_premarket" ? "premarket" : "alpha",

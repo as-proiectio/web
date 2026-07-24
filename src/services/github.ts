@@ -61,8 +61,12 @@ export async function fetchSignalMarkdown(
     type === "premarket"
       ? "premarket/alpha_signal_premarket"
       : "report/alpha_signal";
+
+  const cleanDate = date.replace(/-/g, "");
   const filename =
-    lang === "ko" ? `${mappedType}_${date}_ko.md` : `${mappedType}_${date}.md`;
+    lang === "ko"
+      ? `${mappedType}_${cleanDate}_ko.md`
+      : `${mappedType}_${cleanDate}.md`;
 
   const res = await githubFetch(
     `https://api.github.com/repos/${REPO}/contents/${filename}`,
@@ -70,9 +74,15 @@ export async function fetchSignalMarkdown(
   );
 
   if (!res.ok) {
+    if (res.status === 401) {
+      throw new Error(
+        "401 Unauthorized (GITHUB_PAT 토큰이 만료되었거나 유효하지 않습니다)",
+      );
+    }
     throw new Error(
-      `Failed to fetch markdown file from GitHub: ${res.statusText}`,
+      `Failed to fetch markdown file from GitHub: [HTTP ${res.status}] ${res.statusText}`,
     );
   }
+
   return res.text();
 }

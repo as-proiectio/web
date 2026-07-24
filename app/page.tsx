@@ -6,6 +6,7 @@ import { fetchSignalList, fetchSignalMarkdown } from "@/services/github";
 import { compileMDX } from "next-mdx-remote/rsc";
 import Link from "next/link";
 import LocalDate from "@/components/LocalDate";
+import { getSignalReportDateYMD } from "@/utils/format-date";
 import FallbackNotice from "@/components/FallbackNotice";
 import { shouldShowFallbackWarning } from "@/utils/fallback-warning";
 import { Suspense } from "react";
@@ -112,26 +113,29 @@ export default async function Home({ searchParams }: PageProps) {
     );
 
     if (signals.length > 0) {
+      const { kst: todayKst, ny: todayNy } = getTodayDateStrings();
+      const todayKstYMD = todayKst.replace(/-/g, "");
+      const todayNyYMD = todayNy.replace(/-/g, "");
+
+      hasTodayReport = signals.some((s) => {
+        const ymd = getSignalReportDateYMD(s);
+        return ymd === todayNyYMD || ymd === todayKstYMD;
+      });
+
       if (selectedDateParam) {
         currentSignal = signals.find(
-          (s) => s.date.slice(0, 10).replace(/-/g, "") === selectedDateParam,
+          (s) => getSignalReportDateYMD(s) === selectedDateParam,
         );
 
         if (!currentSignal) {
           currentSignal = signals[0];
-          isRollback = true;
         }
       } else {
         currentSignal = signals[0];
-
-        const { kst: todayKst, ny: todayNy } = getTodayDateStrings();
-        const signalDateYMD = currentSignal?.date?.slice(0, 10);
-        hasTodayReport =
-          signalDateYMD === todayNy || signalDateYMD === todayKst;
-        if (shouldShowFallbackWarning(activeTab, hasTodayReport)) {
-          isRollback = true;
-        }
       }
+
+      isRollback =
+        !hasTodayReport && shouldShowFallbackWarning(activeTab, false);
     }
   } catch (err) {
     console.error("Failed to fetch signal list:", err);
@@ -161,9 +165,7 @@ export default async function Home({ searchParams }: PageProps) {
       archiveList = signals.slice(start, end + 1);
     }
   }
-  const dateYMD = currentSignal
-    ? currentSignal.date.slice(0, 10).replace(/-/g, "")
-    : "";
+  const dateYMD = currentSignal ? getSignalReportDateYMD(currentSignal) : "";
 
   return (
     <div className="max-w-300 mx-auto px-6 py-8">
@@ -295,7 +297,7 @@ export default async function Home({ searchParams }: PageProps) {
               </div>
               <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide snap-x">
                 {archiveList.map((item, idx) => {
-                  const itemYMD = item.date.slice(0, 10).replace(/-/g, "");
+                  const itemYMD = getSignalReportDateYMD(item);
                   const isActive = currentSignal?.date === item.date;
 
                   return (
@@ -344,7 +346,7 @@ export default async function Home({ searchParams }: PageProps) {
             </div>
             <div className="flex flex-col gap-2.5">
               {archiveList.map((item, idx) => {
-                const itemYMD = item.date.slice(0, 10).replace(/-/g, "");
+                const itemYMD = getSignalReportDateYMD(item);
                 const isActive = currentSignal?.date === item.date;
 
                 return (

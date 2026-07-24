@@ -33,3 +33,17 @@ export function formatSignalDate(dateStr: string): string {
 
   return `${year}.${month}.${day}. ${ampm} ${hour12}시 ${minutes}분`;
 }
+
+export function getSignalReportDateYMD(signal: {
+  filename?: string;
+  date?: string;
+}): string {
+  if (signal?.filename) {
+    const match = signal.filename.match(/(\d{8})/);
+    if (match) return match[1];
+  }
+  if (signal?.date) {
+    return signal.date.slice(0, 10).replace(/-/g, "");
+  }
+  return "";
+}

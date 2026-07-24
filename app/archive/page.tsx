@@ -1,6 +1,6 @@
 import React from "react";
 import { fetchSignalList } from "@/services/github";
-import { formatSignalDate } from "@/utils/format-date";
+import { formatSignalDate, getSignalReportDateYMD } from "@/utils/format-date";
 import Link from "next/link";
 import LocalDate from "@/components/LocalDate";
 
@@ -122,7 +122,7 @@ export default async function ArchivePage({ searchParams }: PageProps) {
           ) : paginatedSignals.length > 0 ? (
             <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
               {paginatedSignals.map((item, index) => {
-                const dateYMD = item.date.slice(0, 10).replace(/-/g, "");
+                const dateYMD = getSignalReportDateYMD(item);
 
                 return (
                   <Link
