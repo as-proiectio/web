@@ -127,21 +127,9 @@ export function getUsMarketHolidays(year: number): Set<string> {
 }
 
 export function isUsMarketHoliday(date: Date): boolean {
-  // Format given date as YYYY-MM-DD in America/New_York timezone
-  const nyParts = new Intl.DateTimeFormat("en-US", {
+  const ymd = date.toLocaleDateString("en-CA", {
     timeZone: "America/New_York",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(date);
-
-  const y = nyParts.find((p) => p.type === "year")?.value;
-  const m = nyParts.find((p) => p.type === "month")?.value;
-  const d = nyParts.find((p) => p.type === "day")?.value;
-
-  if (!y || !m || !d) return false;
-  const ymd = `${y}-${m}-${d}`;
-
-  const holidays = getUsMarketHolidays(Number(y));
-  return holidays.has(ymd);
+  });
+  const year = Number(ymd.slice(0, 4));
+  return getUsMarketHolidays(year).has(ymd);
 }
