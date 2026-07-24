@@ -5,9 +5,9 @@ import { sanitizeMarkdownForMdx } from "@/utils/sanitize-mdx";
 import { fetchSignalList, fetchSignalMarkdown } from "@/services/github";
 import { compileMDX } from "next-mdx-remote/rsc";
 import Link from "next/link";
-import { formatSignalDate } from "@/utils/format-date";
-import { isUsMarketHoliday } from "@/utils/us-market-holidays";
 import LocalDate from "@/components/LocalDate";
+import FallbackNotice from "@/components/FallbackNotice";
+import { shouldShowFallbackWarning } from "@/utils/fallback-warning";
 import { Suspense } from "react";
 
 function ReportSkeleton() {
@@ -82,57 +82,12 @@ interface SignalFrontmatter {
   date?: string;
 }
 
-const getKstDateString = () => {
-  const kstParts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Seoul",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(new Date());
-
-  const y = kstParts.find((p) => p.type === "year")?.value;
-  const m = kstParts.find((p) => p.type === "month")?.value;
-  const d = kstParts.find((p) => p.type === "day")?.value;
-
-  return `${y}-${m}-${d}`;
-};
-
-function shouldShowFallbackWarning(
-  activeTab: "alpha" | "premarket",
-  hasTodayReport: boolean,
-): boolean {
-  if (hasTodayReport) return false;
-
+const getTodayDateStrings = () => {
   const now = new Date();
-
-  const kstDayName = now.toLocaleDateString("en-US", {
-    timeZone: "Asia/Seoul",
-    weekday: "long",
-  });
-
-  const isWeekend = kstDayName === "Saturday" || kstDayName === "Sunday";
-  if (isWeekend) return false;
-
-  if (isUsMarketHoliday(now)) return false;
-
-  const kstTimeStr = now.toLocaleTimeString("en-US", {
-    timeZone: "Asia/Seoul",
-    hour12: false,
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  const [currentHour, currentMinute] = kstTimeStr.split(":").map(Number);
-  const currentTimeVal = currentHour * 60 + currentMinute;
-
-  if (activeTab === "alpha") {
-    const threshold = 20 * 60 + 30; // 20:30
-    return currentTimeVal >= threshold;
-  } else {
-    const threshold = 23 * 60 + 10; // 23:10
-    return currentTimeVal >= threshold;
-  }
-}
+  const kst = now.toLocaleDateString("en-CA", { timeZone: "Asia/Seoul" });
+  const ny = now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  return { kst, ny };
+};
 
 export default async function Home({ searchParams }: PageProps) {
   const resolvedParams = await searchParams;
@@ -144,6 +99,8 @@ export default async function Home({ searchParams }: PageProps) {
   let currentSignal: any = null;
   let isRollback = false;
   let fetchError = "";
+
+  let hasTodayReport = false;
 
   try {
     const list = await fetchSignalList();
@@ -167,8 +124,10 @@ export default async function Home({ searchParams }: PageProps) {
       } else {
         currentSignal = signals[0];
 
-        const todayKst = getKstDateString();
-        const hasTodayReport = currentSignal?.date?.slice(0, 10) === todayKst;
+        const { kst: todayKst, ny: todayNy } = getTodayDateStrings();
+        const signalDateYMD = currentSignal?.date?.slice(0, 10);
+        hasTodayReport =
+          signalDateYMD === todayNy || signalDateYMD === todayKst;
         if (shouldShowFallbackWarning(activeTab, hasTodayReport)) {
           isRollback = true;
         }
@@ -264,14 +223,13 @@ export default async function Home({ searchParams }: PageProps) {
           </div>
 
           {/* Warning / Fallback Notice Banner */}
-          {isRollback && currentSignal && (
-            <div className="bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 text-xs py-3 px-4 rounded-lg border border-blue-200/50 dark:border-blue-900/50 flex items-center gap-2">
-              <span>💡</span>
-              <span>
-                오늘 자 리포트가 아직 준비되지 않아, 가장 최신 리포트(
-                {formatSignalDate(currentSignal.date)})를 표시합니다.
-              </span>
-            </div>
+          {currentSignal && (
+            <FallbackNotice
+              isRollback={isRollback}
+              currentSignalDate={currentSignal.date}
+              activeTab={activeTab}
+              hasTodayReport={hasTodayReport}
+            />
           )}
 
           {/* Document Header Info */}
