@@ -60,7 +60,12 @@ describe("SignalDetailPage", () => {
   it("should allow valid params and fetch markdown", async () => {
     vi.mocked(getCompiledSignal).mockResolvedValueOnce({
       content: <p>Content</p>,
-      frontmatter: { title: "Test", date: "20260714", category: "alpha_signal", lang: "ko" },
+      frontmatter: {
+        title: "Test",
+        date: "20260714",
+        category: "alpha_signal",
+        lang: "ko",
+      },
     });
     const params = Promise.resolve({
       lang: "ko",

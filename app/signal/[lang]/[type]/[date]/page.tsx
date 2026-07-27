@@ -56,7 +56,12 @@ export default async function SignalDetailPage({ params }: PageProps) {
   }
 
   let content: React.ReactNode;
-  let frontmatter: SignalFrontmatter = { title: "", date: "", category: "alpha_signal", lang: "ko" };
+  let frontmatter: SignalFrontmatter = {
+    title: "",
+    date: "",
+    category: "alpha_signal",
+    lang: "ko",
+  };
 
   try {
     const compiled = await getCompiledSignal(lang, type, date);

@@ -15,7 +15,8 @@ export default function SupportPage() {
           Alpha Signals 제휴/후원
         </h1>
         <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 leading-relaxed max-w-xl mx-auto">
-          정보 파트너십으로 함께 성장하고, 투명하고 객관적인 지표 제공을 지지합니다.
+          정보 파트너십으로 함께 성장하고, 투명하고 객관적인 지표 제공을
+          지지합니다.
         </p>
       </header>
 

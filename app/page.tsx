@@ -38,11 +38,7 @@ async function ReportViewerContent({
   dateYMD,
 }: ReportViewerContentProps) {
   try {
-    const { content } = await getCompiledSignal(
-      activeLang,
-      activeTab,
-      dateYMD,
-    );
+    const { content } = await getCompiledSignal(activeLang, activeTab, dateYMD);
 
     return (
       <article className="prose dark:prose-invert max-w-none prose-sm sm:prose-base">
