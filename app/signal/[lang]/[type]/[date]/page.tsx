@@ -1,18 +1,20 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { fetchSignalMarkdown, fetchSignalList } from "@/services/github";
-import { compileMDX } from "next-mdx-remote/rsc";
+import {
+  getCompiledSignal,
+  getCachedSignalList,
+  SignalFrontmatter,
+} from "@/services/github";
 import LocalDate from "@/components/LocalDate";
 import Disclaimer from "@/components/Disclaimer";
 import ShareButton from "@/components/ShareButton";
-import { sanitizeMarkdownForMdx } from "@/utils/sanitize-mdx";
 import { getSignalReportDateYMD } from "@/utils/format-date";
 
 export const revalidate = 3600; // Revalidate every hour
 
 export async function generateStaticParams() {
   try {
-    const list = await fetchSignalList();
+    const list = await getCachedSignalList();
     return list.map((s) => {
       const dateYMD = getSignalReportDateYMD(s);
       return {
@@ -25,11 +27,6 @@ export async function generateStaticParams() {
     console.error("Failed to generate static params:", err);
     return [];
   }
-}
-
-interface SignalFrontmatter {
-  title?: string;
-  date?: string;
 }
 
 interface PageProps {
@@ -58,31 +55,16 @@ export default async function SignalDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  let rawMarkdown: string;
+  let content: React.ReactNode;
+  let frontmatter: SignalFrontmatter = { title: "", date: "", category: "alpha_signal", lang: "ko" };
+
   try {
-    rawMarkdown = await fetchSignalMarkdown(lang, type, date);
+    const compiled = await getCompiledSignal(lang, type, date);
+    content = compiled.content;
+    frontmatter = compiled.frontmatter || {};
   } catch (err) {
     console.error(
       `Failed to fetch signal markdown (${lang}/${type}/${date}):`,
-      err,
-    );
-    notFound();
-  }
-
-  let content: React.ReactNode;
-  let frontmatter: SignalFrontmatter = {};
-
-  try {
-    const sanitized = sanitizeMarkdownForMdx(rawMarkdown);
-    const mdxResult = await compileMDX<SignalFrontmatter>({
-      source: sanitized,
-      options: { parseFrontmatter: true },
-    });
-    content = mdxResult.content;
-    frontmatter = mdxResult.frontmatter || {};
-  } catch (err) {
-    console.error(
-      `Failed to compile MDX for signal (${lang}/${type}/${date}):`,
       err,
     );
     notFound();

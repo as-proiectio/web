@@ -1,3 +1,8 @@
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
+import { compileMDX } from "next-mdx-remote/rsc";
+import { sanitizeMarkdownForMdx } from "@/utils/sanitize-mdx";
+
 export interface SignalFrontmatter {
   title: string;
   date: string;
@@ -52,6 +57,14 @@ export async function fetchSignalList(): Promise<SignalListItem[]> {
   return signals;
 }
 
+export const getCachedSignalList = unstable_cache(
+  async (): Promise<SignalListItem[]> => {
+    return fetchSignalList();
+  },
+  ["signals-list-cache"],
+  { revalidate: 60, tags: ["signal"] },
+);
+
 export async function fetchSignalMarkdown(
   lang: string,
   type: string,
@@ -86,3 +99,24 @@ export async function fetchSignalMarkdown(
 
   return res.text();
 }
+
+export const getCachedSignalMarkdown = unstable_cache(
+  async (lang: string, type: string, date: string): Promise<string> => {
+    return fetchSignalMarkdown(lang, type, date);
+  },
+  ["signal-markdown-cache"],
+  { revalidate: 3600, tags: ["signal"] },
+);
+
+export const getCompiledSignal = cache(
+  async (lang: string, type: string, date: string) => {
+    const rawMarkdown = await getCachedSignalMarkdown(lang, type, date);
+    const sanitized = sanitizeMarkdownForMdx(rawMarkdown);
+    return compileMDX<SignalFrontmatter>({
+      source: sanitized,
+      options: { parseFrontmatter: true },
+    });
+  },
+);
+
+

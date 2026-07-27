@@ -1,5 +1,5 @@
 import React from "react";
-import { fetchSignalList } from "@/services/github";
+import { getCachedSignalList } from "@/services/github";
 import { formatSignalDate, getSignalReportDateYMD } from "@/utils/format-date";
 import Link from "next/link";
 import LocalDate from "@/components/LocalDate";
@@ -26,7 +26,7 @@ export default async function ArchivePage({ searchParams }: PageProps) {
   let fetchError = "";
 
   try {
-    const list = await fetchSignalList();
+    const list = await getCachedSignalList();
     const targetCategory =
       activeTab === "premarket" ? "alpha_signal_premarket" : "alpha_signal";
 

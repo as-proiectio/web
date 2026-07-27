@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import SignalDetailPage from "../app/signal/[lang]/[type]/[date]/page";
 import { notFound } from "next/navigation";
-import { fetchSignalMarkdown } from "../src/services/github";
+import { getCompiledSignal } from "../src/services/github";
 
 vi.mock("next/navigation", () => ({
   notFound: vi.fn(() => {
@@ -10,7 +10,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("../src/services/github", () => ({
-  fetchSignalMarkdown: vi.fn(),
+  getCompiledSignal: vi.fn(),
 }));
 
 describe("SignalDetailPage", () => {
@@ -58,9 +58,10 @@ describe("SignalDetailPage", () => {
   });
 
   it("should allow valid params and fetch markdown", async () => {
-    vi.mocked(fetchSignalMarkdown).mockResolvedValueOnce(
-      "---\ntitle: Test\n---\nContent",
-    );
+    vi.mocked(getCompiledSignal).mockResolvedValueOnce({
+      content: "<p>Content</p>",
+      frontmatter: { title: "Test", date: "20260714", category: "alpha_signal", lang: "ko" },
+    });
     const params = Promise.resolve({
       lang: "ko",
       type: "alpha",
@@ -69,7 +70,7 @@ describe("SignalDetailPage", () => {
 
     const result = await SignalDetailPage({ params });
     expect(result).toBeDefined();
-    expect(fetchSignalMarkdown).toHaveBeenCalledWith("ko", "alpha", "20260714");
+    expect(getCompiledSignal).toHaveBeenCalledWith("ko", "alpha", "20260714");
     expect(notFound).not.toHaveBeenCalled();
   });
 });

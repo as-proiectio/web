@@ -1,9 +1,7 @@
 import Adsense from "@/components/Adsense";
 import Disclaimer from "@/components/Disclaimer";
 import ShareButton from "@/components/ShareButton";
-import { sanitizeMarkdownForMdx } from "@/utils/sanitize-mdx";
-import { fetchSignalList, fetchSignalMarkdown } from "@/services/github";
-import { compileMDX } from "next-mdx-remote/rsc";
+import { getCachedSignalList, getCompiledSignal } from "@/services/github";
 import Link from "next/link";
 import LocalDate from "@/components/LocalDate";
 import { getSignalReportDateYMD } from "@/utils/format-date";
@@ -40,17 +38,11 @@ async function ReportViewerContent({
   dateYMD,
 }: ReportViewerContentProps) {
   try {
-    const rawMarkdown = await fetchSignalMarkdown(
+    const { content } = await getCompiledSignal(
       activeLang,
       activeTab,
       dateYMD,
     );
-
-    const sanitized = sanitizeMarkdownForMdx(rawMarkdown);
-    const { content } = await compileMDX<SignalFrontmatter>({
-      source: sanitized,
-      options: { parseFrontmatter: true },
-    });
 
     return (
       <article className="prose dark:prose-invert max-w-none prose-sm sm:prose-base">
@@ -78,11 +70,6 @@ interface PageProps {
   }>;
 }
 
-interface SignalFrontmatter {
-  title?: string;
-  date?: string;
-}
-
 const getTodayDateStrings = () => {
   const now = new Date();
   const kst = now.toLocaleDateString("en-CA", { timeZone: "Asia/Seoul" });
@@ -104,7 +91,7 @@ export default async function Home({ searchParams }: PageProps) {
   let hasTodayReport = false;
 
   try {
-    const list = await fetchSignalList();
+    const list = await getCachedSignalList();
     const targetCategory =
       activeTab === "premarket" ? "alpha_signal_premarket" : "alpha_signal";
 
