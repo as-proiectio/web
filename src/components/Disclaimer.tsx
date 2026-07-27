@@ -1,5 +1,4 @@
 import React from "react";
-import Link from "next/link";
 
 export default function Disclaimer() {
   return (
@@ -26,14 +25,14 @@ export default function Disclaimer() {
           전적으로 본인에게 있습니다.
         </li>
         <li>
-          서비스 운영에 관한 질문은{" "}
-          <Link
-            href="/support"
+          서비스 운영 및 제휴에 관한 문의는 공식 이메일(
+          <a
+            href="mailto:info@alphasignals.cloud"
             className="underline hover:text-blue-600 dark:hover:text-blue-400 font-semibold"
           >
-            지원 및 문의 안내 채널
-          </Link>
-          을 통해 문의하여 주시기 바랍니다. 리포트의 해석 또는 투자 판단에
+            info@alphasignals.cloud
+          </a>
+          )을 통해 문의하여 주시기 바랍니다. 리포트의 해석 또는 투자 판단에
           영향을 미치는 문의에는 답변하지 않습니다.
         </li>
       </ol>

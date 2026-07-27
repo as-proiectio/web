@@ -21,7 +21,7 @@ export default function Footer() {
               아카이브
             </Link>
             <Link href="/support" className="hover:underline">
-              지원하기
+              제휴/후원
             </Link>
           </div>
         </div>

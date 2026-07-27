@@ -42,7 +42,7 @@ export default async function Header() {
               href="/support"
               className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-50 transition-colors"
             >
-              후원하기
+              제휴/후원
             </Link>
             <ThemeToggle />
           </nav>
