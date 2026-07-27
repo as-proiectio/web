@@ -58,9 +58,7 @@ export async function fetchSignalList(): Promise<SignalListItem[]> {
 }
 
 export const getCachedSignalList = unstable_cache(
-  async (): Promise<SignalListItem[]> => {
-    return fetchSignalList();
-  },
+  fetchSignalList,
   ["signals-list-cache"],
   { revalidate: 60, tags: ["signal"] },
 );
@@ -101,9 +99,7 @@ export async function fetchSignalMarkdown(
 }
 
 export const getCachedSignalMarkdown = unstable_cache(
-  async (lang: string, type: string, date: string): Promise<string> => {
-    return fetchSignalMarkdown(lang, type, date);
-  },
+  fetchSignalMarkdown,
   ["signal-markdown-cache"],
   { revalidate: 3600, tags: ["signal"] },
 );
@@ -118,5 +114,6 @@ export const getCompiledSignal = cache(
     });
   },
 );
+
 
 
