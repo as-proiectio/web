@@ -109,17 +109,12 @@ export default async function Home({ searchParams }: PageProps) {
         return ymd === todayNyYMD || ymd === todayKstYMD;
       });
 
-      if (selectedDateParam) {
-        currentSignal = signals.find(
-          (s) => getSignalReportDateYMD(s) === selectedDateParam,
-        );
-
-        if (!currentSignal) {
-          currentSignal = signals[0];
-        }
-      } else {
-        currentSignal = signals[0];
-      }
+      currentSignal =
+        (selectedDateParam &&
+          signals.find(
+            (s) => getSignalReportDateYMD(s) === selectedDateParam,
+          )) ||
+        signals[0];
 
       isRollback =
         !hasTodayReport && shouldShowFallbackWarning(activeTab, false);
