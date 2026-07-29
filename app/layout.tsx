@@ -35,7 +35,7 @@ export const metadata = {
     type: "website",
     images: [
       {
-        url: "/logo-light.png",
+        url: "/logo.svg",
         width: 512,
         height: 512,
         alt: "Alpha Signals Logo",
@@ -45,7 +45,7 @@ export const metadata = {
   twitter: {
     card: "summary",
     title: "Alpha Signals - 미국 주식 리포트",
-    images: ["/logo-light.png"],
+    images: ["/logo.svg"],
   },
   other: {
     "google-adsense-account": "ca-pub-3003049022959567",
