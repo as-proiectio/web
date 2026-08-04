@@ -1,8 +1,10 @@
 import React from "react";
 import { getCachedSignalList } from "@/services/github";
-import { formatSignalDate, getSignalReportDateYMD } from "@/utils/format-date";
+import { fetchPipelineMetrics } from "@/services/stats";
+import { getSignalReportDateYMD } from "@/utils/format-date";
 import Link from "next/link";
 import LocalDate from "@/components/LocalDate";
+import ArchiveMetricDashboard from "@/components/social-proof/ArchiveMetricDashboard";
 
 interface PageProps {
   searchParams: Promise<{
@@ -24,6 +26,7 @@ export default async function ArchivePage({ searchParams }: PageProps) {
 
   let signals: any[] = [];
   let fetchError = "";
+  const metrics = await fetchPipelineMetrics();
 
   try {
     const list = await getCachedSignalList();
@@ -55,10 +58,12 @@ export default async function ArchivePage({ searchParams }: PageProps) {
             📁 전체 리포트 아카이브
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Alpha Signal 및 Premarket 리포트 목록을 페이지별로 열람할 수
-            있습니다.
+            Alpha Signal 및 Premarket 리포트 목록과 수집/분석 누적 메트릭입니다.
           </p>
         </div>
+
+        {/* Cumulative Pipeline Metric Dashboard */}
+        <ArchiveMetricDashboard metrics={metrics} />
 
         {/* Filters Bar */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2">
