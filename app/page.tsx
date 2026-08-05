@@ -2,6 +2,7 @@ import Adsense from "@/components/Adsense";
 import Disclaimer from "@/components/Disclaimer";
 import ShareButton from "@/components/ShareButton";
 import { getCachedSignalList, getCompiledSignal } from "@/services/github";
+import { fetchPipelineMetrics } from "@/services/stats";
 import Link from "next/link";
 import LocalDate from "@/components/LocalDate";
 import { getSignalReportDateYMD } from "@/utils/format-date";
@@ -85,6 +86,7 @@ export default async function Home({ searchParams }: PageProps) {
   let fetchError = "";
 
   let hasTodayReport = false;
+  const metrics = await fetchPipelineMetrics();
 
   try {
     const list = await getCachedSignalList();
@@ -212,13 +214,13 @@ export default async function Home({ searchParams }: PageProps) {
             />
           )}
 
-          {/* Document Header Info & Clean System Verification Badge */}
+          {/* Document Header Info & Active Reader Social Proof Badge */}
           {currentSignal && (
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold border border-emerald-500/20">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  AI 시그널 검증 완료 · 1차 출처 데이터
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-semibold border border-blue-500/20">
+                  <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                  👥 오늘 {metrics.todayReadersCount.toLocaleString()}명의 독자가 방문했습니다
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50 leading-tight">
