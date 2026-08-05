@@ -214,15 +214,9 @@ export default async function Home({ searchParams }: PageProps) {
             />
           )}
 
-          {/* Document Header Info & Daily/Cumulative Investor Social Proof Badge */}
+          {/* Document Header Info */}
           {currentSignal && (
             <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-semibold border border-blue-500/20 font-mono">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-                  👥 오늘의 투자자: {metrics.todayReadersCount.toLocaleString()}명 · 함께하는 투자자: {metrics.totalAnalyzedSignals.toLocaleString()}명
-                </span>
-              </div>
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50 leading-tight">
                 {currentSignal.title}
               </h1>
@@ -266,8 +260,19 @@ export default async function Home({ searchParams }: PageProps) {
             )}
           </div>
 
-          {/* Mobile Bottom Layout (Archive) */}
+          {/* Mobile Bottom Layout (Social Proof & Archive) */}
           <div className="flex lg:hidden flex-col gap-6 mt-4">
+            {/* Mobile Investor Social Proof Badge */}
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2 text-xs">
+              <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
+                오늘의 투자자: <strong className="text-blue-600 dark:text-blue-400">{metrics.todayReadersCount.toLocaleString()}명</strong>
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                함께하는 투자자: {metrics.totalAnalyzedSignals.toLocaleString()}명
+              </span>
+            </div>
+
             {/* Archive Section */}
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between pb-1">
@@ -317,6 +322,30 @@ export default async function Home({ searchParams }: PageProps) {
 
         {/* Right Column: Sidebar (LG screens only) */}
         <aside className="hidden lg:flex sticky top-8 flex-col gap-6">
+          {/* Investor Social Proof Sidebar Card */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-4 flex flex-col gap-2.5 shadow-xs">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
+                <span>알파시그널 독자 네트워크</span>
+              </h3>
+            </div>
+            <div className="flex flex-col gap-2 pt-1 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500 dark:text-slate-400">오늘의 투자자</span>
+                <span className="font-bold font-mono text-blue-600 dark:text-blue-400 text-sm">
+                  {metrics.todayReadersCount.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">명</span>
+                </span>
+              </div>
+              <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800/60 pt-2">
+                <span className="text-slate-500 dark:text-slate-400">함께하는 투자자</span>
+                <span className="font-bold font-mono text-slate-900 dark:text-slate-100 text-sm">
+                  {metrics.totalAnalyzedSignals.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">명</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
           {/* Archive Section */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-4 flex flex-col gap-4">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
