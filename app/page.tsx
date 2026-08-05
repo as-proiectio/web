@@ -214,13 +214,13 @@ export default async function Home({ searchParams }: PageProps) {
             />
           )}
 
-          {/* Document Header Info & Active Reader Social Proof Badge */}
+          {/* Document Header Info & Daily/Cumulative Investor Social Proof Badge */}
           {currentSignal && (
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-semibold border border-blue-500/20">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-semibold border border-blue-500/20 font-mono">
                   <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-                  👥 오늘 {metrics.todayReadersCount.toLocaleString()}명의 독자가 방문했습니다
+                  👥 오늘의 투자자: {metrics.todayReadersCount.toLocaleString()}명 · 함께하는 투자자: {metrics.totalAnalyzedSignals.toLocaleString()}명
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50 leading-tight">
