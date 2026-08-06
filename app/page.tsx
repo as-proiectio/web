@@ -260,17 +260,38 @@ export default async function Home({ searchParams }: PageProps) {
             )}
           </div>
 
-          {/* Mobile Bottom Layout (Social Proof & Archive) */}
+          {/* Mobile Bottom Layout (Data Engine Status & Archive) */}
           <div className="flex lg:hidden flex-col gap-6 mt-4">
-            {/* Mobile Investor Social Proof Badge */}
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2 text-xs">
-              <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
-                오늘의 투자자: <strong className="text-blue-600 dark:text-blue-400">{metrics.todayReadersCount.toLocaleString()}명</strong>
-              </span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-                함께하는 투자자: {metrics.totalAnalyzedSignals.toLocaleString()}명
-              </span>
+            {/* Mobile Data Engine Status Card */}
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex flex-col gap-2 text-xs">
+              <div className="flex items-center justify-between font-semibold text-slate-700 dark:text-slate-300 pb-1 border-b border-slate-200/60 dark:border-slate-800">
+                <span className="flex items-center gap-1.5">
+                  <span>📊</span> 데이터 엔진 가동 현황
+                </span>
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">
+                  ● ACTIVE
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center pt-1">
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-slate-400">발행 리포트</span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                    {metrics.totalPublishedReports.toLocaleString()}건
+                  </span>
+                </div>
+                <div className="flex flex-col border-x border-slate-200 dark:border-slate-800 px-1">
+                  <span className="text-[10px] text-slate-400">AI 시그널</span>
+                  <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                    {metrics.totalAnalyzedSignals.toLocaleString()}개
+                  </span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-slate-400">누적 수집</span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                    {metrics.totalCrawledArticles.toLocaleString()}건
+                  </span>
+                </div>
+              </div>
             </div>
 
             {/* Archive Section */}
@@ -322,25 +343,31 @@ export default async function Home({ searchParams }: PageProps) {
 
         {/* Right Column: Sidebar (LG screens only) */}
         <aside className="hidden lg:flex sticky top-8 flex-col gap-6">
-          {/* Investor Social Proof Sidebar Card */}
+          {/* Data Engine Metrics Sidebar Card */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-4 flex flex-col gap-2.5 shadow-xs">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
               <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
-                <span>알파시그널 독자 네트워크</span>
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>📊 데이터 엔진 가동 현황</span>
               </h3>
             </div>
             <div className="flex flex-col gap-2 pt-1 text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-slate-500 dark:text-slate-400">오늘의 투자자</span>
-                <span className="font-bold font-mono text-blue-600 dark:text-blue-400 text-sm">
-                  {metrics.todayReadersCount.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">명</span>
+                <span className="text-slate-500 dark:text-slate-400">발행 리포트</span>
+                <span className="font-bold font-mono text-emerald-600 dark:text-emerald-400 text-sm">
+                  {metrics.totalPublishedReports.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">건</span>
                 </span>
               </div>
               <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800/60 pt-2">
-                <span className="text-slate-500 dark:text-slate-400">함께하는 투자자</span>
+                <span className="text-slate-500 dark:text-slate-400">AI 분석 시그널</span>
+                <span className="font-bold font-mono text-indigo-600 dark:text-indigo-400 text-sm">
+                  {metrics.totalAnalyzedSignals.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">개</span>
+                </span>
+              </div>
+              <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800/60 pt-2">
+                <span className="text-slate-500 dark:text-slate-400">누적 수집 기사</span>
                 <span className="font-bold font-mono text-slate-900 dark:text-slate-100 text-sm">
-                  {metrics.totalAnalyzedSignals.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">명</span>
+                  {metrics.totalCrawledArticles.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">건</span>
                 </span>
               </div>
             </div>
