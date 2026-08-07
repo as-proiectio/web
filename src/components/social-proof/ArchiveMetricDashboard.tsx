@@ -31,9 +31,16 @@ export default function ArchiveMetricDashboard({
       </div>
 
       <div className="bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 p-4 rounded-xl flex flex-col gap-1 shadow-xs">
-        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-          📑 발행 리포트
-        </span>
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            📑 발행 리포트
+          </span>
+          {metrics.alphaReportsCount > 0 && (
+            <span className="text-[10px] text-slate-400 font-mono">
+              Alpha {metrics.alphaReportsCount} · Premarket {metrics.premarketReportsCount}
+            </span>
+          )}
+        </div>
         <span className="text-xl sm:text-2xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400">
           {metrics.totalPublishedReports.toLocaleString()}
           <span className="text-xs font-normal text-slate-500 ml-1">건</span>
