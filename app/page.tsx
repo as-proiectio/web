@@ -265,29 +265,29 @@ export default async function Home({ searchParams }: PageProps) {
             {/* Mobile Data Engine Status Card */}
             <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex flex-col gap-2 text-xs">
               <div className="flex items-center justify-between font-semibold text-slate-700 dark:text-slate-300 pb-1 border-b border-slate-200/60 dark:border-slate-800">
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 font-bold">
                   <span>📊</span> 데이터 엔진 가동 현황
                 </span>
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
                   ● ACTIVE
                 </span>
               </div>
               <div className="grid grid-cols-3 gap-2 text-center pt-1">
                 <div className="flex flex-col">
                   <span className="text-[10px] text-slate-400">발행 리포트</span>
-                  <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                  <span className="font-bold text-slate-900 dark:text-slate-100">
                     {metrics.totalPublishedReports.toLocaleString()}건
                   </span>
                 </div>
                 <div className="flex flex-col border-x border-slate-200 dark:border-slate-800 px-1">
                   <span className="text-[10px] text-slate-400">AI 시그널</span>
-                  <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                  <span className="font-bold text-indigo-600 dark:text-indigo-400">
                     {metrics.totalAnalyzedSignals.toLocaleString()}개
                   </span>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] text-slate-400">누적 수집</span>
-                  <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                  <span className="font-bold text-slate-900 dark:text-slate-100">
                     {metrics.totalCrawledArticles.toLocaleString()}건
                   </span>
                 </div>
@@ -354,19 +354,19 @@ export default async function Home({ searchParams }: PageProps) {
             <div className="flex flex-col gap-2 pt-1 text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-slate-500 dark:text-slate-400">발행 리포트</span>
-                <span className="font-bold font-mono text-emerald-600 dark:text-emerald-400 text-sm">
+                <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">
                   {metrics.totalPublishedReports.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">건</span>
                 </span>
               </div>
               <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800/60 pt-2">
                 <span className="text-slate-500 dark:text-slate-400">AI 분석 시그널</span>
-                <span className="font-bold font-mono text-indigo-600 dark:text-indigo-400 text-sm">
+                <span className="font-bold text-indigo-600 dark:text-indigo-400 text-sm">
                   {metrics.totalAnalyzedSignals.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">개</span>
                 </span>
               </div>
               <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800/60 pt-2">
                 <span className="text-slate-500 dark:text-slate-400">누적 수집 기사</span>
-                <span className="font-bold font-mono text-slate-900 dark:text-slate-100 text-sm">
+                <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">
                   {metrics.totalCrawledArticles.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">건</span>
                 </span>
               </div>
