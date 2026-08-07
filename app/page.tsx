@@ -276,19 +276,28 @@ export default async function Home({ searchParams }: PageProps) {
                 <div className="flex flex-col">
                   <span className="text-[10px] text-slate-400">발행 리포트</span>
                   <span className="font-bold text-slate-900 dark:text-slate-100">
-                    {metrics.totalPublishedReports.toLocaleString()}건
+                    {metrics.totalPublishedReports.toLocaleString()}
+                  </span>
+                  <span className="text-[9px] text-blue-600 dark:text-blue-400 font-medium">
+                    +{metrics.todayPublishedReports}
                   </span>
                 </div>
                 <div className="flex flex-col border-x border-slate-200 dark:border-slate-800 px-1">
-                  <span className="text-[10px] text-slate-400">AI 시그널</span>
+                  <span className="text-[10px] text-slate-400">추출 시그널</span>
                   <span className="font-bold text-indigo-600 dark:text-indigo-400">
-                    {metrics.totalAnalyzedSignals.toLocaleString()}개
+                    {metrics.totalAnalyzedSignals.toLocaleString()}
+                  </span>
+                  <span className="text-[9px] text-indigo-500 font-medium">
+                    +{metrics.todayAnalyzedSignals}
                   </span>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] text-slate-400">누적 수집</span>
                   <span className="font-bold text-slate-900 dark:text-slate-100">
-                    {metrics.totalCrawledArticles.toLocaleString()}건
+                    {metrics.totalCrawledArticles.toLocaleString()}
+                  </span>
+                  <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-medium">
+                    +{metrics.todayCrawledArticles}
                   </span>
                 </div>
               </div>
@@ -354,21 +363,36 @@ export default async function Home({ searchParams }: PageProps) {
             <div className="flex flex-col gap-2 pt-1 text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-slate-500 dark:text-slate-400">발행 리포트</span>
-                <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">
-                  {metrics.totalPublishedReports.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">건</span>
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">
+                    {metrics.totalPublishedReports.toLocaleString()}
+                  </span>
+                  <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">
+                    +{metrics.todayPublishedReports}
+                  </span>
+                </div>
               </div>
               <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800/60 pt-2">
-                <span className="text-slate-500 dark:text-slate-400">AI 분석 시그널</span>
-                <span className="font-bold text-indigo-600 dark:text-indigo-400 text-sm">
-                  {metrics.totalAnalyzedSignals.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">개</span>
-                </span>
+                <span className="text-slate-500 dark:text-slate-400">추출 시그널</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-indigo-600 dark:text-indigo-400 text-sm">
+                    {metrics.totalAnalyzedSignals.toLocaleString()}
+                  </span>
+                  <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded">
+                    +{metrics.todayAnalyzedSignals}
+                  </span>
+                </div>
               </div>
               <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800/60 pt-2">
-                <span className="text-slate-500 dark:text-slate-400">누적 수집 기사</span>
-                <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">
-                  {metrics.totalCrawledArticles.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">건</span>
-                </span>
+                <span className="text-slate-500 dark:text-slate-400">누적 수집</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+                    {metrics.totalCrawledArticles.toLocaleString()}
+                  </span>
+                  <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                    +{metrics.todayCrawledArticles}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
