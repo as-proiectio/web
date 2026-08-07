@@ -6,6 +6,7 @@ export interface PipelineMetrics {
   premarketReportsCount: number;
   todayCrawledArticles: number;
   todayAnalyzedSignals: number;
+  todayPublishedReports: number;
   todayReadersCount: number;
   activeBackersCount: number;
   updatedAt: string;
