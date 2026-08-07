@@ -25,11 +25,11 @@ export default function ArchiveMetricDashboard({
         </span>
       </div>
 
-      {/* Total Analyzed Signals */}
+      {/* Total Extracted Signals */}
       <div className="bg-slate-50 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 p-4 rounded-xl flex flex-col gap-1.5 shadow-xs">
         <div className="flex items-center justify-between">
           <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-            🔍 AI 분석 시그널
+            🔍 추출된 핵심 시그널
           </span>
           <span className="inline-flex items-center text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
             ▲ +{metrics.todayAnalyzedSignals.toLocaleString()}

@@ -373,7 +373,7 @@ export default async function Home({ searchParams }: PageProps) {
                 </div>
               </div>
               <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800/60 pt-2">
-                <span className="text-slate-500 dark:text-slate-400">추출 시그널</span>
+                <span className="text-slate-500 dark:text-slate-400">추출된 핵심 시그널</span>
                 <div className="flex items-center gap-1.5">
                   <span className="font-bold text-indigo-600 dark:text-indigo-400 text-sm">
                     {metrics.totalAnalyzedSignals.toLocaleString()}
@@ -384,7 +384,7 @@ export default async function Home({ searchParams }: PageProps) {
                 </div>
               </div>
               <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800/60 pt-2">
-                <span className="text-slate-500 dark:text-slate-400">누적 수집</span>
+                <span className="text-slate-500 dark:text-slate-400">누적 수집 기사</span>
                 <div className="flex items-center gap-1.5">
                   <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">
                     {metrics.totalCrawledArticles.toLocaleString()}
