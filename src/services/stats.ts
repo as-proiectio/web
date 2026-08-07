@@ -1,7 +1,7 @@
 import { PipelineMetrics } from "@/types/stats";
 import { getCachedSignalList } from "@/services/github";
 
-const DEFAULT_CRAWLED_ARTICLES = 54320;
+const DEFAULT_CRAWLED_ARTICLES = 26130;
 const REPO = "as-proiectio/data";
 
 export async function fetchPipelineMetrics(): Promise<PipelineMetrics> {
@@ -27,7 +27,7 @@ export async function fetchPipelineMetrics(): Promise<PipelineMetrics> {
           totalCrawledArticles: metaData.totalCrawledArticles || DEFAULT_CRAWLED_ARTICLES,
           todayCrawledArticles: metaData.todayCrawledArticles || 1171,
           totalAnalyzedSignals: metaData.totalAnalyzedSignals || 24850,
-          todayAnalyzedSignals: metaData.todayAnalyzedSignals || 48,
+          todayAnalyzedSignals: metaData.todayAnalyzedSignals || 270,
           totalPublishedReports: metaData.totalPublishedReports || 540,
           todayPublishedReports: metaData.todayPublishedReports || 2,
           alphaReportsCount: metaData.alphaReportsCount || 360,
@@ -66,11 +66,11 @@ export async function fetchPipelineMetrics(): Promise<PipelineMetrics> {
     totalPublishedReports = alphaReportsCount + premarketReportsCount;
 
     const alphaHttpsCount = alphaSignals.reduce(
-      (acc, s: any) => acc + (s.urlCount || s.httpsCount || 120),
+      (acc, s: any) => acc + (s.urlCount || s.httpsCount || 270),
       0,
     );
     const premarketHttpsCount = premarketSignals.reduce(
-      (acc, s: any) => acc + (s.urlCount || s.httpsCount || 35),
+      (acc, s: any) => acc + (s.urlCount || s.httpsCount || 65),
       0,
     );
 
@@ -81,7 +81,7 @@ export async function fetchPipelineMetrics(): Promise<PipelineMetrics> {
     const todayReports = canonicalSignals.filter((s) => s.date === latestDate);
     todayPublishedReports = todayReports.length;
     todayAnalyzedSignals = todayReports.reduce(
-      (acc, s: any) => acc + (s.urlCount || s.httpsCount || 35),
+      (acc, s: any) => acc + (s.urlCount || s.httpsCount || 270),
       0,
     );
   } catch (err) {
@@ -89,9 +89,9 @@ export async function fetchPipelineMetrics(): Promise<PipelineMetrics> {
     alphaReportsCount = 180;
     premarketReportsCount = 90;
     totalPublishedReports = 270;
-    totalAnalyzedSignals = 180 * 120 + 90 * 35;
+    totalAnalyzedSignals = 180 * 270 + 90 * 65;
     todayPublishedReports = 2;
-    todayAnalyzedSignals = 48;
+    todayAnalyzedSignals = 270;
   }
 
   return {
