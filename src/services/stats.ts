@@ -71,10 +71,12 @@ export async function fetchPipelineMetrics(): Promise<PipelineMetrics> {
       0,
     );
 
-    // Today delta estimates from latest published date
-    const latestDate = canonicalSignals[0]?.date || "";
-    const todayReports = canonicalSignals.filter((s) => s.date === latestDate);
-    todayPublishedReports = todayReports.length;
+    // Grab latest published report from EACH category (Regular Alpha Signal + Premarket)
+    const latestAlpha = alphaSignals[0];
+    const latestPremarket = premarketSignals[0];
+    const todayReports = [latestAlpha, latestPremarket].filter(Boolean);
+
+    todayPublishedReports = todayReports.length; // 1 Alpha + 1 Premarket = 2
     todayAnalyzedSignals = todayReports.reduce(
       (acc, s: any) => acc + (s.urlCount || s.httpsCount || s.signalCount || 0),
       0,
