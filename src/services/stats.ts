@@ -1,7 +1,7 @@
 import { PipelineMetrics } from "@/types/stats";
 import { getCachedSignalList } from "@/services/github";
 
-const DEFAULT_CRAWLED_ARTICLES = 26130;
+const DEFAULT_CRAWLED_ARTICLES = 0;
 const REPO = "as-proiectio/data";
 
 export async function fetchPipelineMetrics(): Promise<PipelineMetrics> {
@@ -24,8 +24,8 @@ export async function fetchPipelineMetrics(): Promise<PipelineMetrics> {
       if (metaRes.ok) {
         const metaData = await metaRes.json();
         return {
-          totalCrawledArticles: metaData.totalCrawledArticles || DEFAULT_CRAWLED_ARTICLES,
-          todayCrawledArticles: metaData.todayCrawledArticles || 1171,
+          totalCrawledArticles: metaData.totalCrawledArticles || 0,
+          todayCrawledArticles: metaData.todayCrawledArticles || 0,
           totalAnalyzedSignals: metaData.totalAnalyzedSignals || 0,
           todayAnalyzedSignals: metaData.todayAnalyzedSignals || 0,
           totalPublishedReports: metaData.totalPublishedReports || 0,
@@ -85,7 +85,7 @@ export async function fetchPipelineMetrics(): Promise<PipelineMetrics> {
 
   return {
     totalCrawledArticles: DEFAULT_CRAWLED_ARTICLES,
-    todayCrawledArticles: 1171,
+    todayCrawledArticles: 0,
     totalAnalyzedSignals,
     todayAnalyzedSignals,
     totalPublishedReports,
