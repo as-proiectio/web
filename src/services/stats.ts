@@ -26,12 +26,12 @@ export async function fetchPipelineMetrics(): Promise<PipelineMetrics> {
         return {
           totalCrawledArticles: metaData.totalCrawledArticles || DEFAULT_CRAWLED_ARTICLES,
           todayCrawledArticles: metaData.todayCrawledArticles || 1171,
-          totalAnalyzedSignals: metaData.totalAnalyzedSignals || 24850,
-          todayAnalyzedSignals: metaData.todayAnalyzedSignals || 270,
-          totalPublishedReports: metaData.totalPublishedReports || 540,
-          todayPublishedReports: metaData.todayPublishedReports || 2,
-          alphaReportsCount: metaData.alphaReportsCount || 360,
-          premarketReportsCount: metaData.premarketReportsCount || 180,
+          totalAnalyzedSignals: metaData.totalAnalyzedSignals || 0,
+          todayAnalyzedSignals: metaData.todayAnalyzedSignals || 0,
+          totalPublishedReports: metaData.totalPublishedReports || 0,
+          todayPublishedReports: metaData.todayPublishedReports || 0,
+          alphaReportsCount: metaData.alphaReportsCount || 0,
+          premarketReportsCount: metaData.premarketReportsCount || 0,
           todayReadersCount: 0,
           activeBackersCount: 0,
           updatedAt: metaData.lastUpdated || new Date().toISOString(),
@@ -65,33 +65,22 @@ export async function fetchPipelineMetrics(): Promise<PipelineMetrics> {
     premarketReportsCount = premarketSignals.length;
     totalPublishedReports = alphaReportsCount + premarketReportsCount;
 
-    const alphaHttpsCount = alphaSignals.reduce(
-      (acc, s: any) => acc + (s.urlCount || s.httpsCount || 270),
-      0,
-    );
-    const premarketHttpsCount = premarketSignals.reduce(
-      (acc, s: any) => acc + (s.urlCount || s.httpsCount || 65),
+    // Dynamically calculate cumulative extracted signals from canonical KO report urlCounts
+    totalAnalyzedSignals = canonicalSignals.reduce(
+      (acc, s: any) => acc + (s.urlCount || s.httpsCount || s.signalCount || 0),
       0,
     );
 
-    totalAnalyzedSignals = alphaHttpsCount + premarketHttpsCount;
-
-    // Today delta estimates
+    // Today delta estimates from latest published date
     const latestDate = canonicalSignals[0]?.date || "";
     const todayReports = canonicalSignals.filter((s) => s.date === latestDate);
     todayPublishedReports = todayReports.length;
     todayAnalyzedSignals = todayReports.reduce(
-      (acc, s: any) => acc + (s.urlCount || s.httpsCount || 270),
+      (acc, s: any) => acc + (s.urlCount || s.httpsCount || s.signalCount || 0),
       0,
     );
   } catch (err) {
     console.warn("Failed to fetch signal list for metrics calculation:", err);
-    alphaReportsCount = 180;
-    premarketReportsCount = 90;
-    totalPublishedReports = 270;
-    totalAnalyzedSignals = 180 * 270 + 90 * 65;
-    todayPublishedReports = 2;
-    todayAnalyzedSignals = 270;
   }
 
   return {
