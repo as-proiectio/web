@@ -7,39 +7,41 @@ const REPO = "as-proiectio/data";
 export async function fetchPipelineMetrics(): Promise<PipelineMetrics> {
   const pat = process.env.GITHUB_PAT;
 
-  // Try fetching signals_meta.json first if available
-  if (pat) {
-    try {
-      const metaRes = await fetch(
-        `https://api.github.com/repos/${REPO}/contents/signals_meta.json`,
-        {
-          headers: {
-            Authorization: `token ${pat}`,
-            Accept: "application/vnd.github.v3.raw",
-          },
-          next: { tags: ["signal"], revalidate: 60 },
-        },
-      );
+  // 1. Try fetching signals_meta.json via GitHub API or raw fallback URL
+  try {
+    const metaUrl = pat
+      ? `https://api.github.com/repos/${REPO}/contents/signals_meta.json`
+      : `https://raw.githubusercontent.com/${REPO}/main/signals_meta.json`;
 
-      if (metaRes.ok) {
-        const metaData = await metaRes.json();
-        return {
-          totalCrawledArticles: metaData.totalCrawledArticles || 0,
-          todayCrawledArticles: metaData.todayCrawledArticles || 0,
-          totalAnalyzedSignals: metaData.totalAnalyzedSignals || 0,
-          todayAnalyzedSignals: metaData.todayAnalyzedSignals || 0,
-          totalPublishedReports: metaData.totalPublishedReports || 0,
-          todayPublishedReports: metaData.todayPublishedReports || 0,
-          alphaReportsCount: metaData.alphaReportsCount || 0,
-          premarketReportsCount: metaData.premarketReportsCount || 0,
-          todayReadersCount: 0,
-          activeBackersCount: 0,
-          updatedAt: metaData.lastUpdated || new Date().toISOString(),
-        };
-      }
-    } catch {
-      // Fallback to dynamic list calculation
+    const headers: Record<string, string> = {};
+    if (pat) {
+      headers["Authorization"] = `token ${pat}`;
+      headers["Accept"] = "application/vnd.github.v3.raw";
     }
+
+    const metaRes = await fetch(metaUrl, {
+      headers,
+      next: { tags: ["signal"], revalidate: 60 },
+    });
+
+    if (metaRes.ok) {
+      const metaData = await metaRes.json();
+      return {
+        totalCrawledArticles: metaData.totalCrawledArticles || 0,
+        todayCrawledArticles: metaData.todayCrawledArticles || 0,
+        totalAnalyzedSignals: metaData.totalAnalyzedSignals || 0,
+        todayAnalyzedSignals: metaData.todayAnalyzedSignals || 0,
+        totalPublishedReports: metaData.totalPublishedReports || 0,
+        todayPublishedReports: metaData.todayPublishedReports || 0,
+        alphaReportsCount: metaData.alphaReportsCount || 0,
+        premarketReportsCount: metaData.premarketReportsCount || 0,
+        todayReadersCount: 0,
+        activeBackersCount: 0,
+        updatedAt: metaData.lastUpdated || new Date().toISOString(),
+      };
+    }
+  } catch {
+    // Fallback to dynamic calculation if metadata file is unavailable
   }
 
   let alphaReportsCount = 0;
