@@ -7,116 +7,98 @@ export type AdSlot = "top_leaderboard" | "content_inline" | "sidebar" | "bottom"
 interface AdBannerProps {
   provider?: AdProvider;
   slot?: AdSlot;
+  variant?: "native" | "image";
   className?: string;
 }
 
 const TRADINGVIEW_AFFILIATE_URL =
-  "https://kr.tradingview.com/alphasignals?aff_id=169847";
+  "https://www.tradingview.com/chart/?aff_id=169847&utm_source=creative&utm_lang=KR";
 
 export default function AdBanner({
   provider = "tradingview",
   slot = "sidebar",
+  variant = "native",
   className = "",
 }: AdBannerProps) {
   if (provider === "tradingview") {
-    if (slot === "sidebar" || slot === "bottom") {
+    if (variant === "native") {
       return (
         <aside
-          aria-label="TradingView Partner Banner"
-          className={`w-full flex flex-col gap-1.5 ${className}`}
+          aria-label="TradingView Partner Card"
+          className={`w-full ${className}`}
         >
-          <div className="flex items-center justify-between px-1">
-            <span className="text-[10px] font-medium tracking-wider text-slate-400 dark:text-slate-500 uppercase">
-              Partner
-            </span>
-            <span className="text-[9px] text-slate-400 dark:text-slate-500">
-              TradingView
-            </span>
-          </div>
-
           <a
             href={TRADINGVIEW_AFFILIATE_URL}
             target="_blank"
             rel="sponsored noopener noreferrer"
-            className="group block w-full overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 transition-all duration-200 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-            title="TradingView - 실시간 금융 차트 플랫폼"
+            className="group block p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 hover:bg-slate-100/70 dark:bg-slate-900/60 dark:hover:bg-slate-800/60 transition-all duration-200 shadow-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+            title="TradingView - 실시간 금융 차트 및 기술적 분석 플랫폼"
           >
-            {/* Light Mode */}
-            <Image
-              src="/banners/tradingview/rectangle-light.jpg"
-              alt="TradingView 실시간 금융 차트 플랫폼"
-              width={300}
-              height={250}
-              className="w-full h-auto dark:hidden transition-transform duration-300 group-hover:scale-[1.02]"
-            />
-            {/* Dark Mode */}
-            <Image
-              src="/banners/tradingview/rectangle-dark.jpg"
-              alt="TradingView 실시간 금융 차트 플랫폼"
-              width={300}
-              height={250}
-              className="w-full h-auto hidden dark:block transition-transform duration-300 group-hover:scale-[1.02]"
-            />
+            <div className="flex items-center justify-between gap-2 mb-2">
+              {/* TradingView Official Vector Logo */}
+              <div className="relative h-4 w-24">
+                <Image
+                  src="/logos/tradingview/full-logo-black.svg"
+                  alt="TradingView"
+                  fill
+                  className="object-contain object-left dark:hidden"
+                  unoptimized
+                />
+                <Image
+                  src="/logos/tradingview/full-logo-white.svg"
+                  alt="TradingView"
+                  fill
+                  className="object-contain object-left hidden dark:block"
+                  unoptimized
+                />
+              </div>
+              <span className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-slate-800">
+                Partner
+              </span>
+            </div>
+
+            <p className="text-[11px] text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed mb-2.5">
+              전 세계 6,000만 트레이더가 사용하는 실시간 차트 & 종목 스크리너
+            </p>
+
+            <div className="flex items-center justify-between text-[11px] font-semibold text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+              <span>실시간 차트 열기</span>
+              <span className="text-xs transition-transform duration-200 group-hover:translate-x-0.5">
+                →
+              </span>
+            </div>
           </a>
         </aside>
       );
     }
 
-    // Default Leaderboard slot (if explicitly requested)
+    // Compact image fallback
     return (
       <aside
-        aria-label="Sponsored Advertisement"
-        className={`w-full my-4 flex flex-col items-center justify-center ${className}`}
+        aria-label="TradingView Banner"
+        className={`w-full flex justify-center ${className}`}
       >
-        <div className="w-full max-w-4xl flex flex-col items-center">
-          <div className="w-full flex justify-end mb-1 pr-1">
-            <span className="text-[9px] tracking-wider text-slate-400 dark:text-slate-500 uppercase font-medium">
-              Sponsored
-            </span>
-          </div>
-
-          <a
-            href={TRADINGVIEW_AFFILIATE_URL}
-            target="_blank"
-            rel="sponsored noopener noreferrer"
-            className="group block w-full overflow-hidden rounded-xl transition-all duration-200 hover:scale-[1.005] focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-            title="TradingView - 전 세계 6천만 트레이더가 사용하는 실시간 차트"
-          >
-            <div className="hidden sm:block w-full">
-              <Image
-                src="/banners/tradingview/leaderboard-light.jpg"
-                alt="TradingView 실시간 금융 차트 플랫폼"
-                width={1456}
-                height={180}
-                className="w-full h-auto rounded-xl border border-slate-200/80 dark:border-slate-800/80 dark:hidden shadow-xs"
-              />
-              <Image
-                src="/banners/tradingview/leaderboard-dark.jpg"
-                alt="TradingView 실시간 금융 차트 플랫폼"
-                width={1456}
-                height={180}
-                className="w-full h-auto rounded-xl border border-slate-200/80 dark:border-slate-800/80 hidden dark:block shadow-xs"
-              />
-            </div>
-
-            <div className="block sm:hidden w-full flex justify-center">
-              <Image
-                src="/banners/tradingview/rectangle-light.jpg"
-                alt="TradingView 실시간 금융 차트 플랫폼"
-                width={300}
-                height={250}
-                className="w-full max-w-[320px] h-auto rounded-xl border border-slate-200/80 dark:border-slate-800/80 dark:hidden shadow-xs"
-              />
-              <Image
-                src="/banners/tradingview/rectangle-dark.jpg"
-                alt="TradingView 실시간 금융 차트 플랫폼"
-                width={300}
-                height={250}
-                className="w-full max-w-[320px] h-auto rounded-xl border border-slate-200/80 dark:border-slate-800/80 hidden dark:block shadow-xs"
-              />
-            </div>
-          </a>
-        </div>
+        <a
+          href={TRADINGVIEW_AFFILIATE_URL}
+          target="_blank"
+          rel="sponsored noopener noreferrer"
+          className="group block overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 transition-all hover:scale-[1.01] shadow-xs"
+        >
+          <Image
+            src="/banners/tradingview/rectangle-light.jpg"
+            alt="TradingView"
+            width={250}
+            height={250}
+            className="w-auto h-auto max-w-[250px] dark:hidden"
+          />
+          <Image
+            src="/banners/tradingview/rectangle-dark.jpg"
+            alt="TradingView"
+            width={250}
+            height={250}
+            className="w-auto h-auto max-w-[250px] hidden dark:block"
+          />
+        </a>
       </aside>
     );
   }

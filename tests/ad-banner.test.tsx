@@ -4,26 +4,25 @@ import { renderToStaticMarkup } from "react-dom/server";
 import AdBanner from "../src/components/AdBanner";
 
 describe("AdBanner component", () => {
-  it("renders TradingView native banner with correct affiliate link and rel for sidebar slot", () => {
+  it("renders TradingView native partner card with correct affiliate link and SVGs", () => {
     const html = renderToStaticMarkup(
-      <AdBanner provider="tradingview" slot="sidebar" />,
+      <AdBanner provider="tradingview" variant="native" />,
     );
 
-    expect(html).toContain(
-      'href="https://kr.tradingview.com/alphasignals?aff_id=169847"',
-    );
+    expect(html).toContain("https://www.tradingview.com/chart/?aff_id=169847");
     expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="sponsored noopener noreferrer"');
-    expect(html).toContain("rectangle-light.jpg");
-    expect(html).toContain("rectangle-dark.jpg");
+    expect(html).toContain("full-logo-black.svg");
+    expect(html).toContain("full-logo-white.svg");
+    expect(html).toContain("Partner");
   });
 
-  it("renders both dark and light mode banner images for leaderboard slot", () => {
+  it("renders compact image banner when variant is image", () => {
     const html = renderToStaticMarkup(
-      <AdBanner provider="tradingview" slot="top_leaderboard" />,
+      <AdBanner provider="tradingview" variant="image" />,
     );
 
-    expect(html).toContain("leaderboard-light.jpg");
-    expect(html).toContain("leaderboard-dark.jpg");
+    expect(html).toContain("rectangle-light.jpg");
+    expect(html).toContain("rectangle-dark.jpg");
   });
 });
