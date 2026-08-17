@@ -1,4 +1,5 @@
 import Adsense from "@/components/Adsense";
+import AdBanner from "@/components/AdBanner";
 import Disclaimer from "@/components/Disclaimer";
 import ShareButton from "@/components/ShareButton";
 import { getCachedSignalList, getCompiledSignal } from "@/services/github";
@@ -228,6 +229,9 @@ export default async function Home({ searchParams }: PageProps) {
               </div>
             </div>
           )}
+
+          {/* Sponsored Ad Banner */}
+          <AdBanner provider="tradingview" slot="top_leaderboard" />
 
           {/* Main Article Content */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-6 sm:p-8 min-h-75 shadow-xs">

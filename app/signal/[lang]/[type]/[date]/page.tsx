@@ -8,6 +8,7 @@ import {
 import LocalDate from "@/components/LocalDate";
 import Disclaimer from "@/components/Disclaimer";
 import ShareButton from "@/components/ShareButton";
+import AdBanner from "@/components/AdBanner";
 import { getSignalReportDateYMD } from "@/utils/format-date";
 
 export const revalidate = 3600; // Revalidate every hour
@@ -99,6 +100,9 @@ export default async function SignalDetailPage({ params }: PageProps) {
           />
         </div>
       </header>
+
+      {/* Sponsored Ad Banner */}
+      <AdBanner provider="tradingview" slot="top_leaderboard" />
 
       <article className="prose min-h-50">{content}</article>
       <Disclaimer />
