@@ -101,11 +101,13 @@ export default async function SignalDetailPage({ params }: PageProps) {
         </div>
       </header>
 
-      {/* Sponsored Ad Banner */}
-      <AdBanner provider="tradingview" slot="top_leaderboard" />
-
       <article className="prose min-h-50">{content}</article>
       <Disclaimer />
+
+      {/* Partner Banner */}
+      <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
+        <AdBanner provider="tradingview" slot="bottom" />
+      </div>
     </div>
   );
 }

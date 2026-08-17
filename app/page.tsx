@@ -230,9 +230,6 @@ export default async function Home({ searchParams }: PageProps) {
             </div>
           )}
 
-          {/* Sponsored Ad Banner */}
-          <AdBanner provider="tradingview" slot="top_leaderboard" />
-
           {/* Main Article Content */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-6 sm:p-8 min-h-75 shadow-xs">
             {fetchError ? (
@@ -351,6 +348,9 @@ export default async function Home({ searchParams }: PageProps) {
                 })}
               </div>
             </div>
+
+            {/* Mobile Bottom Partner Banner */}
+            <AdBanner provider="tradingview" slot="bottom" />
           </div>
         </div>
 
@@ -445,6 +445,9 @@ export default async function Home({ searchParams }: PageProps) {
               })}
             </div>
           </div>
+
+          {/* Desktop Sidebar Partner Banner */}
+          <AdBanner provider="tradingview" slot="sidebar" />
         </aside>
       </div>
     </div>
