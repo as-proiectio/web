@@ -8,18 +8,22 @@ interface AdBannerProps {
   provider?: AdProvider;
   slot?: AdSlot;
   variant?: "native" | "image";
+  affiliateUrl?: string;
   className?: string;
 }
 
 const TRADINGVIEW_AFFILIATE_URL =
-  "https://www.tradingview.com/chart/?aff_id=169847&utm_source=creative&utm_lang=KR";
+  "https://kr.tradingview.com/alphasignals?aff_id=169847";
 
 export default function AdBanner({
   provider = "tradingview",
   slot = "sidebar",
   variant = "native",
+  affiliateUrl,
   className = "",
 }: AdBannerProps) {
+  const tvUrl = affiliateUrl || TRADINGVIEW_AFFILIATE_URL;
+
   if (provider === "tradingview") {
     if (variant === "native") {
       return (
@@ -28,7 +32,7 @@ export default function AdBanner({
           className={`w-full ${className}`}
         >
           <a
-            href={TRADINGVIEW_AFFILIATE_URL}
+            href={tvUrl}
             target="_blank"
             rel="sponsored noopener noreferrer"
             className="group block p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 hover:bg-slate-100/70 dark:bg-slate-900/60 dark:hover:bg-slate-800/60 transition-all duration-200 shadow-xs focus:outline-none focus:ring-2 focus:ring-blue-500/40"
@@ -79,7 +83,7 @@ export default function AdBanner({
         className={`w-full flex justify-center ${className}`}
       >
         <a
-          href={TRADINGVIEW_AFFILIATE_URL}
+          href={tvUrl}
           target="_blank"
           rel="sponsored noopener noreferrer"
           className="group block overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 transition-all hover:scale-[1.01] shadow-xs"

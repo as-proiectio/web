@@ -9,7 +9,9 @@ describe("AdBanner component", () => {
       <AdBanner provider="tradingview" variant="native" />,
     );
 
-    expect(html).toContain("https://www.tradingview.com/chart/?aff_id=169847");
+    expect(html).toContain(
+      "https://kr.tradingview.com/alphasignals?aff_id=169847",
+    );
     expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="sponsored noopener noreferrer"');
     expect(html).toContain("full-logo-black.svg");
