@@ -10,7 +10,7 @@ describe("AdBanner component", () => {
     );
 
     expect(html).toContain(
-      "https://kr.tradingview.com/alphasignals?aff_id=169847",
+      "https://kr.tradingview.com/chart/?aff_id=169847",
     );
     expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="sponsored noopener noreferrer"');

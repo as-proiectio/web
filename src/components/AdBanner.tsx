@@ -13,7 +13,7 @@ interface AdBannerProps {
 }
 
 const TRADINGVIEW_AFFILIATE_URL =
-  "https://kr.tradingview.com/alphasignals?aff_id=169847";
+  "https://kr.tradingview.com/chart/?aff_id=169847";
 
 export default function AdBanner({
   provider = "tradingview",
