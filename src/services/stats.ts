@@ -69,7 +69,7 @@ export async function fetchPipelineMetrics(): Promise<PipelineMetrics> {
 
     // Dynamically calculate cumulative extracted signals from canonical KO report urlCounts
     totalAnalyzedSignals = canonicalSignals.reduce(
-      (acc, s: any) => acc + (s.urlCount || s.httpsCount || s.signalCount || 0),
+      (acc, s) => acc + (s.urlCount || 0),
       0,
     );
 
@@ -80,7 +80,7 @@ export async function fetchPipelineMetrics(): Promise<PipelineMetrics> {
 
     todayPublishedReports = todayReports.length; // 1 Alpha + 1 Premarket = 2
     todayAnalyzedSignals = todayReports.reduce(
-      (acc, s: any) => acc + (s.urlCount || s.httpsCount || s.signalCount || 0),
+      (acc, s) => acc + (s.urlCount || 0),
       0,
     );
   } catch (err) {

@@ -13,6 +13,8 @@ export interface SignalFrontmatter {
 export interface SignalListItem extends SignalFrontmatter {
   filename: string;
   excerpt: string;
+  readingMinutes?: number;
+  urlCount?: number;
 }
 
 const REPO = "as-proiectio/data";
